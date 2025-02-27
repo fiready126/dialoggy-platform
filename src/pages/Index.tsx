@@ -8,27 +8,100 @@ import {
   MessageSquare, 
   User, 
   Settings, 
-  ChevronLeft, 
-  ChevronRight, 
   RefreshCw,
   PanelLeft,
   Trash,
-  Info
+  History,
+  Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ChatMessage from "@/components/ChatMessage";
 import SidePanel from "@/components/SidePanel";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ChatSession, Message } from "@/types/chat";
+import { ChatSession, Message, CompanyData } from "@/types/chat";
 import { useToast } from "@/components/ui/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { QuestionHint } from "@/components/QuestionHint";
+import { ChatHistoryModal } from "@/components/ChatHistoryModal";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import * as XLSX from 'xlsx';
 
-const DEFAULT_SYSTEM_MESSAGE = "You are a helpful, creative, and concise assistant.";
+const DEFAULT_SYSTEM_MESSAGE = "You are a helpful, creative, and concise assistant. When asked about companies or CEOs, provide detailed information in a structured format.";
+
+// Sample company data for demonstration
+const SAMPLE_COMPANIES: CompanyData[] = [
+  {
+    id: "1",
+    name: "TechVision Inc.",
+    position: "CEO",
+    ceo: "Sarah Johnson",
+    website: "https://techvision.example.com",
+    industry: "Technology",
+    location: "San Francisco, CA",
+    workEmail: "info@techvision.example.com",
+    salesEmail: "sales@techvision.example.com",
+    leadScores: { engagement: 85, firmographicFit: 90, conversion: 75, rank: 83 },
+    description: "TechVision is a leading provider of AI-powered business solutions, helping companies transform their operations through innovative technology."
+  },
+  {
+    id: "2",
+    name: "Green Energy Solutions",
+    position: "Founder",
+    ceo: "Michael Chen",
+    website: "https://greenenergy.example.com",
+    industry: "Renewable Energy",
+    location: "Austin, TX",
+    workEmail: "contact@greenenergy.example.com",
+    salesEmail: "partnerships@greenenergy.example.com",
+    leadScores: { engagement: 72, firmographicFit: 65, conversion: 68, rank: 70 },
+    description: "Green Energy Solutions develops sustainable energy systems for residential and commercial applications."
+  },
+  {
+    id: "3",
+    name: "HealthPlus",
+    position: "President",
+    ceo: "Emily Rodriguez",
+    website: "https://healthplus.example.com",
+    industry: "Healthcare",
+    location: "Boston, MA",
+    workEmail: "info@healthplus.example.com",
+    salesEmail: "business@healthplus.example.com",
+    leadScores: { engagement: 93, firmographicFit: 87, conversion: 90, rank: 91 },
+    description: "HealthPlus is revolutionizing patient care through digital health platforms and telemedicine solutions."
+  },
+  {
+    id: "4",
+    name: "Global Finance Group",
+    position: "Managing Director",
+    ceo: "Robert Kiyosaki",
+    website: "https://globalfinance.example.com",
+    industry: "Financial Services",
+    location: "New York, NY",
+    workEmail: "contact@globalfinance.example.com",
+    salesEmail: "clients@globalfinance.example.com",
+    leadScores: { engagement: 65, firmographicFit: 80, conversion: 62, rank: 68 },
+    description: "Global Finance Group provides comprehensive financial services to individuals and businesses worldwide."
+  },
+  {
+    id: "5",
+    name: "OceanBlue Logistics",
+    position: "COO",
+    ceo: "James Wilson",
+    website: "https://oceanblue.example.com",
+    industry: "Logistics & Transportation",
+    location: "Miami, FL",
+    workEmail: "info@oceanblue.example.com",
+    salesEmail: "services@oceanblue.example.com",
+    leadScores: { engagement: 78, firmographicFit: 73, conversion: 81, rank: 76 },
+    description: "OceanBlue Logistics offers global shipping and supply chain management solutions for businesses of all sizes."
+  }
+];
 
 const Index = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(true);
+  const [isChatHistoryModalOpen, setIsChatHistoryModalOpen] = useState(false);
   const [activeSession, setActiveSession] = useState<ChatSession>({
     id: "default-session",
     title: "New Chat",
@@ -38,6 +111,7 @@ const Index = () => {
     createdAt: new Date().toISOString(),
   });
   const [sessions, setSessions] = useState<ChatSession[]>([activeSession]);
+  const [lastCompanyList, setLastCompanyList] = useState<CompanyData[]>([]);
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useIsMobile();
@@ -66,6 +140,13 @@ const Index = () => {
     }
   };
 
+  const handleQuestionSelect = (question: string) => {
+    setInput(question);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -91,12 +172,66 @@ const Index = () => {
       // Simulate AI response
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "This is a simulated response. In a real application, you would connect to an API like OpenAI here to get a proper response.",
-        timestamp: new Date().toISOString(),
-      };
+      let aiResponse: Message;
+      
+      // Check if this is a special command
+      const lowerCaseInput = input.trim().toLowerCase();
+      
+      if (lowerCaseInput.includes("find companies") || lowerCaseInput.includes("search companies")) {
+        // For demo purposes, return sample companies
+        aiResponse = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Here are the companies matching your search criteria:",
+          timestamp: new Date().toISOString(),
+          companies: SAMPLE_COMPANIES
+        };
+        setLastCompanyList(SAMPLE_COMPANIES);
+      } else if (lowerCaseInput.includes("find ceos")) {
+        const ceoList = SAMPLE_COMPANIES.map(company => ({
+          id: company.id,
+          name: company.ceo,
+          position: "CEO",
+          ceo: "N/A",
+          website: company.website,
+          industry: company.industry,
+          location: company.location,
+          leadScores: company.leadScores
+        }));
+        
+        aiResponse = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Here are the CEOs you requested:",
+          timestamp: new Date().toISOString(),
+          companies: ceoList
+        };
+        setLastCompanyList(ceoList);
+      } else if (lowerCaseInput.includes("download list")) {
+        aiResponse = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "I'm preparing the Excel file for download...",
+          timestamp: new Date().toISOString(),
+        };
+        
+        // Trigger download
+        if (lastCompanyList.length > 0) {
+          setTimeout(() => {
+            downloadExcel(lastCompanyList);
+          }, 500);
+        } else {
+          aiResponse.content = "I don't have any list data to download. Please search for companies or CEOs first.";
+        }
+      } else {
+        // Regular response
+        aiResponse = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "This is a simulated response. In a real application, you would connect to an API like OpenAI here to get a proper response.",
+          timestamp: new Date().toISOString(),
+        };
+      }
       
       const finalUpdatedSession = {
         ...updatedSession,
@@ -119,6 +254,18 @@ const Index = () => {
         textareaRef.current.focus();
       }
     }
+  };
+
+  const downloadExcel = (data: CompanyData[]) => {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Companies");
+    XLSX.writeFile(workbook, "company-list.xlsx");
+    
+    toast({
+      title: "Download complete",
+      description: "The Excel file has been downloaded successfully.",
+    });
   };
 
   const getSessionTitle = (message: string) => {
@@ -247,6 +394,26 @@ const Index = () => {
                   <Button
                     variant="ghost"
                     size="icon"
+                    onClick={() => setIsChatHistoryModalOpen(true)}
+                    aria-label="Chat history"
+                  >
+                    <History className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage chat history</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <ThemeToggle />
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => {}}
                     aria-label="Settings"
                   >
@@ -275,28 +442,40 @@ const Index = () => {
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-                <div className="p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
-                  <h3 className="font-medium mb-1">Creative Writing</h3>
+                <div 
+                  className="p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => handleQuestionSelect("Find Companies in the technology sector")}
+                >
+                  <h3 className="font-medium mb-1">Find Companies</h3>
                   <p className="text-sm text-muted-foreground">
-                    "Write a short story about a robot discovering emotions"
+                    "Find Companies in the technology sector"
                   </p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
-                  <h3 className="font-medium mb-1">Technical Help</h3>
+                <div 
+                  className="p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => handleQuestionSelect("Find CEOs of healthcare companies")}
+                >
+                  <h3 className="font-medium mb-1">Find CEOs</h3>
                   <p className="text-sm text-muted-foreground">
-                    "Explain the difference between REST and GraphQL"
+                    "Find CEOs of healthcare companies"
                   </p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
-                  <h3 className="font-medium mb-1">Learning</h3>
+                <div 
+                  className="p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => handleQuestionSelect("Download list")}
+                >
+                  <h3 className="font-medium mb-1">Download List</h3>
                   <p className="text-sm text-muted-foreground">
-                    "Teach me about quantum computing for beginners"
+                    "Download the last company list as Excel"
                   </p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
-                  <h3 className="font-medium mb-1">Problem Solving</h3>
+                <div 
+                  className="p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => handleQuestionSelect("Tell me about Green Energy Solutions")}
+                >
+                  <h3 className="font-medium mb-1">Company Research</h3>
                   <p className="text-sm text-muted-foreground">
-                    "Help me debug this JavaScript function..."
+                    "Tell me about Green Energy Solutions"
                   </p>
                 </div>
               </div>
@@ -337,24 +516,27 @@ const Index = () => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     placeholder="Type a message..."
-                    className="min-h-[80px] resize-none pr-12 bg-background rounded-md border-muted-foreground/20"
+                    className="min-h-[80px] resize-none pr-24 bg-background rounded-md border-muted-foreground/20"
                     disabled={isLoading}
                   />
-                  <Button
-                    size="icon"
-                    className={cn(
-                      "absolute right-2 bottom-2 h-8 w-8 rounded-md transition-opacity",
-                      input.trim() ? "opacity-100" : "opacity-0"
-                    )}
-                    onClick={handleSendMessage}
-                    disabled={!input.trim() || isLoading}
-                  >
-                    {isLoading ? (
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
+                  <div className="absolute right-2 bottom-2 flex items-center gap-1">
+                    <QuestionHint onSelectQuestion={handleQuestionSelect} />
+                    <Button
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8 rounded-md transition-opacity",
+                        input.trim() ? "opacity-100" : "opacity-0"
+                      )}
+                      onClick={handleSendMessage}
+                      disabled={!input.trim() || isLoading}
+                    >
+                      {isLoading ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-xs text-center text-muted-foreground mt-2">
                   AI may produce inaccurate information about people, places, or facts.
@@ -383,6 +565,16 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Chat History Modal */}
+      <ChatHistoryModal
+        isOpen={isChatHistoryModalOpen}
+        onClose={() => setIsChatHistoryModalOpen(false)}
+        sessions={sessions}
+        activeSessionId={activeSession.id}
+        onSwitchSession={switchSession}
+        onDeleteSession={deleteSession}
+      />
     </div>
   );
 };

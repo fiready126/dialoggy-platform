@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { CompanyTable } from "./CompanyTable";
 
 interface ChatMessageProps {
   message: Message;
@@ -76,32 +77,39 @@ const ChatMessage = ({ message, isLastMessage, isLoading = false }: ChatMessageP
                 <span>Generating response...</span>
               </div>
             ) : (
-              <div className="prose dark:prose-invert max-w-full">
-                <Markdown
-                  components={{
-                    code(props) {
-                      const { children, className, ...rest } = props;
-                      const match = /language-(\w+)/.exec(className || "");
-                      return match ? (
-                        <SyntaxHighlighter
-                          language={match[1]}
-                          style={atomDark}
-                          PreTag="div"
-                          className="rounded-md mt-2 mb-2"
-                        >
-                          {String(children).replace(/\n$/, "")}
-                        </SyntaxHighlighter>
-                      ) : (
-                        <code className="bg-muted/30 rounded px-1 py-0.5" {...rest}>
-                          {children}
-                        </code>
-                      );
-                    },
-                  }}
-                >
-                  {message.content}
-                </Markdown>
-              </div>
+              <>
+                <div className="prose dark:prose-invert max-w-full">
+                  <Markdown
+                    components={{
+                      code(props) {
+                        const { children, className, ...rest } = props;
+                        const match = /language-(\w+)/.exec(className || "");
+                        return match ? (
+                          <SyntaxHighlighter
+                            language={match[1]}
+                            style={atomDark}
+                            PreTag="div"
+                            className="rounded-md mt-2 mb-2"
+                          >
+                            {String(children).replace(/\n$/, "")}
+                          </SyntaxHighlighter>
+                        ) : (
+                          <code className="bg-muted/30 rounded px-1 py-0.5" {...rest}>
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  >
+                    {message.content}
+                  </Markdown>
+                </div>
+                
+                {/* Render company table if message has companies */}
+                {!isUser && message.companies && message.companies.length > 0 && (
+                  <CompanyTable companies={message.companies} />
+                )}
+              </>
             )}
           </div>
           
