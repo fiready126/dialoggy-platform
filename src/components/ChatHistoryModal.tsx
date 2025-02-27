@@ -40,6 +40,11 @@ export const ChatHistoryModal = ({
   };
 
   const handleDeleteSelected = () => {
+    // Only delete if we have multiple sessions
+    if (sessions.length <= selectedSessions.length) {
+      return;
+    }
+    
     for (const sessionId of selectedSessions) {
       onDeleteSession(sessionId);
     }
@@ -73,6 +78,7 @@ export const ChatHistoryModal = ({
               size="sm"
               onClick={handleDeleteSelected}
               className="flex items-center gap-1"
+              disabled={sessions.length <= selectedSessions.length}
             >
               <Trash2 className="h-4 w-4" />
               Delete Selected ({selectedSessions.length})
@@ -119,9 +125,16 @@ export const ChatHistoryModal = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onDeleteSession(session.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Only allow deletion if there are multiple sessions
+                    if (sessions.length > 1) {
+                      onDeleteSession(session.id);
+                    }
+                  }}
                   className="h-8 w-8 ml-2"
                   aria-label="Delete chat"
+                  disabled={sessions.length <= 1}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

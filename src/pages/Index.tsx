@@ -141,20 +141,21 @@ const Index = () => {
   };
 
   const handleQuestionSelect = (question: string) => {
-    setInput(question);
-    // Immediately send the message after selecting a question
-    setTimeout(() => {
-      handleSendMessage();
-    }, 0);
+    // Don't need to set input since we're sending immediately
+    // Just call handleSendMessage directly with the question
+    sendMessage(question);
   };
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  // New function to handle sending messages with optional content parameter
+  const sendMessage = async (content?: string) => {
+    const messageContent = content || input;
+    
+    if ((!messageContent.trim() && !content) || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: messageContent.trim(),
       timestamp: new Date().toISOString(),
     };
 
@@ -176,7 +177,7 @@ const Index = () => {
       let aiResponse: Message;
       
       // Check if this is a special command
-      const lowerCaseInput = input.trim().toLowerCase();
+      const lowerCaseInput = messageContent.trim().toLowerCase();
       
       if (lowerCaseInput.includes("find companies") || lowerCaseInput.includes("search companies")) {
         // For demo purposes, return sample companies
@@ -234,10 +235,13 @@ const Index = () => {
         };
       }
       
+      // Update the session title based on the first user message
+      const shouldUpdateTitle = updatedSession.messages.length === 1 && updatedSession.title === "New Chat";
+      
       const finalUpdatedSession = {
         ...updatedSession,
         messages: [...updatedSession.messages, aiResponse],
-        title: updatedSession.messages.length === 0 ? getSessionTitle(input) : updatedSession.title,
+        title: shouldUpdateTitle ? getSessionTitle(messageContent) : updatedSession.title,
       };
       
       setActiveSession(finalUpdatedSession);
@@ -255,6 +259,11 @@ const Index = () => {
         textareaRef.current.focus();
       }
     }
+  };
+
+  // Maintain original handleSendMessage but delegate to the new function
+  const handleSendMessage = () => {
+    sendMessage();
   };
 
   const downloadExcel = (data: CompanyData[]) => {
@@ -311,16 +320,17 @@ const Index = () => {
   };
 
   const deleteSession = (sessionId: string) => {
+    // Don't do anything if this is the last session
+    if (sessions.length <= 1) {
+      return;
+    }
+    
     const updatedSessions = sessions.filter(session => session.id !== sessionId);
     
     setSessions(updatedSessions);
     
     if (sessionId === activeSession.id) {
-      if (updatedSessions.length > 0) {
-        setActiveSession(updatedSessions[updatedSessions.length - 1]);
-      } else {
-        createNewSession();
-      }
+      setActiveSession(updatedSessions[updatedSessions.length - 1]);
     }
   };
 
