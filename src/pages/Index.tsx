@@ -142,9 +142,10 @@ const Index = () => {
 
   const handleQuestionSelect = (question: string) => {
     setInput(question);
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
+    // Immediately send the message after selecting a question
+    setTimeout(() => {
+      handleSendMessage();
+    }, 0);
   };
 
   const handleSendMessage = async () => {
