@@ -124,7 +124,9 @@ export const CompanyModal = ({
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div
-                    className={`${scoreColor(company.leadScores.engagement).replace("text-", "bg-")} h-2 rounded-full`}
+                    className={company.leadScores.engagement >= 80 ? "bg-green-500 h-2 rounded-full" : 
+                              company.leadScores.engagement >= 60 ? "bg-yellow-500 h-2 rounded-full" : 
+                              "bg-red-500 h-2 rounded-full"}
                     style={{ width: `${company.leadScores.engagement}%` }}
                   ></div>
                 </div>
@@ -142,7 +144,9 @@ export const CompanyModal = ({
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div
-                    className={`${scoreColor(company.leadScores.firmographicFit).replace("text-", "bg-")} h-2 rounded-full`}
+                    className={company.leadScores.firmographicFit >= 80 ? "bg-green-500 h-2 rounded-full" : 
+                              company.leadScores.firmographicFit >= 60 ? "bg-yellow-500 h-2 rounded-full" : 
+                              "bg-red-500 h-2 rounded-full"}
                     style={{ width: `${company.leadScores.firmographicFit}%` }}
                   ></div>
                 </div>
@@ -160,7 +164,9 @@ export const CompanyModal = ({
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div
-                    className={`${scoreColor(company.leadScores.conversion).replace("text-", "bg-")} h-2 rounded-full`}
+                    className={company.leadScores.conversion >= 80 ? "bg-green-500 h-2 rounded-full" : 
+                              company.leadScores.conversion >= 60 ? "bg-yellow-500 h-2 rounded-full" : 
+                              "bg-red-500 h-2 rounded-full"}
                     style={{ width: `${company.leadScores.conversion}%` }}
                   ></div>
                 </div>
@@ -178,7 +184,9 @@ export const CompanyModal = ({
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div
-                    className={`${scoreColor(company.leadScores.rank).replace("text-", "bg-")} h-2 rounded-full`}
+                    className={company.leadScores.rank >= 80 ? "bg-green-500 h-2 rounded-full" : 
+                              company.leadScores.rank >= 60 ? "bg-yellow-500 h-2 rounded-full" : 
+                              "bg-red-500 h-2 rounded-full"}
                     style={{ width: `${company.leadScores.rank}%` }}
                   ></div>
                 </div>
