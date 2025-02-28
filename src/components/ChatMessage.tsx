@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MessageSquare, User, Copy, Check, RefreshCw } from "lucide-react";
+import { MessageSquare, User, Copy, Check, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Message } from "@/types/chat";
@@ -44,26 +44,30 @@ const ChatMessage = ({ message, isLastMessage, isLoading = false }: ChatMessageP
     >
       <div 
         className={cn(
-          "flex max-w-3xl rounded-lg p-4",
+          "flex max-w-3xl rounded-xl shadow-sm transition-all hover:shadow",
           isUser 
-            ? "bg-primary text-primary-foreground ml-12" 
-            : "bg-muted ml-10 mr-12",
+            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white ml-12" 
+            : "bg-gradient-to-r from-gray-50 to-slate-100 dark:from-gray-900 dark:to-slate-900 ml-10 mr-12",
           isLoading && "opacity-70"
         )}
       >
         <div className={cn(
-          "flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full",
+          "flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-full mt-4 ml-4 shadow",
           isUser 
-            ? "bg-primary-foreground text-primary mr-2" 
-            : "bg-background text-foreground mr-2"
+            ? "bg-blue-500 text-white" 
+            : "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
         )}>
-          {isUser ? <User className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
+          {isUser ? <User className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
         </div>
         
-        <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex flex-col flex-1 min-w-0 p-4">
           <div className="flex items-center justify-between mb-1">
-            <div className="font-medium">
-              {isUser ? "You" : "AI Assistant"}
+            <div className="font-medium flex items-center">
+              {isUser ? "You" : (
+                <span className="flex items-center gap-1">
+                  <span className="text-purple-500 dark:text-purple-400">AI</span> Assistant
+                </span>
+              )}
             </div>
             <div className="text-xs opacity-70">
               {formatTimestamp(message.timestamp)}
@@ -72,13 +76,16 @@ const ChatMessage = ({ message, isLastMessage, isLoading = false }: ChatMessageP
           
           <div className="space-y-2">
             {isLoading ? (
-              <div className="flex items-center">
+              <div className="flex items-center bg-background/10 rounded-lg p-3 animate-pulse">
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                 <span>Generating response...</span>
               </div>
             ) : (
               <>
-                <div className="prose dark:prose-invert max-w-full">
+                <div className={cn(
+                  "prose max-w-full",
+                  isUser ? "prose-invert" : "dark:prose-invert"
+                )}>
                   <Markdown
                     components={{
                       code(props) {
@@ -89,12 +96,16 @@ const ChatMessage = ({ message, isLastMessage, isLoading = false }: ChatMessageP
                             language={match[1]}
                             style={atomDark}
                             PreTag="div"
-                            className="rounded-md mt-2 mb-2"
+                            className="rounded-md mt-2 mb-2 shadow-md"
                           >
                             {String(children).replace(/\n$/, "")}
                           </SyntaxHighlighter>
                         ) : (
-                          <code className="bg-muted/30 rounded px-1 py-0.5" {...rest}>
+                          <code className={cn(
+                              "bg-muted/30 rounded px-1 py-0.5", 
+                              isUser ? "bg-blue-700/50" : "bg-gray-200 dark:bg-gray-800"
+                            )} {...rest}
+                          >
                             {children}
                           </code>
                         );
@@ -107,7 +118,9 @@ const ChatMessage = ({ message, isLastMessage, isLoading = false }: ChatMessageP
                 
                 {/* Render company table if message has companies */}
                 {!isUser && message.companies && message.companies.length > 0 && (
-                  <CompanyTable companies={message.companies} />
+                  <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
+                    <CompanyTable companies={message.companies} />
+                  </div>
                 )}
               </>
             )}
@@ -116,15 +129,18 @@ const ChatMessage = ({ message, isLastMessage, isLoading = false }: ChatMessageP
           {!isUser && !isLoading && (
             <div className="flex justify-end mt-2">
               <Button
-                variant="ghost"
+                variant={isUser ? "ghost" : "outline"}
                 size="sm"
-                className="h-7 px-2 text-xs"
+                className={cn(
+                  "h-8 px-3 text-xs rounded-full transition-all",
+                  isUser ? "text-white hover:bg-white/20" : "hover:shadow",
+                )}
                 onClick={copyToClipboard}
               >
                 {isCopied ? (
-                  <Check className="h-3 w-3 mr-1" />
+                  <Check className="h-3.5 w-3.5 mr-1" />
                 ) : (
-                  <Copy className="h-3 w-3 mr-1" />
+                  <Copy className="h-3.5 w-3.5 mr-1" />
                 )}
                 {isCopied ? "Copied" : "Copy"}
               </Button>
