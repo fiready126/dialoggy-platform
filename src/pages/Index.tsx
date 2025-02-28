@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,7 +15,9 @@ import {
   BrainCircuit,
   Plus,
   ChevronLeft,
-  Menu
+  Menu,
+  Search,
+  Building
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ChatMessage from "@/components/ChatMessage";
@@ -145,12 +146,9 @@ const Index = () => {
   };
 
   const handleQuestionSelect = (question: string) => {
-    // Don't need to set input since we're sending immediately
-    // Just call handleSendMessage directly with the question
     sendMessage(question);
   };
 
-  // New function to handle sending messages with optional content parameter
   const sendMessage = async (content?: string) => {
     const messageContent = content || input;
     
@@ -163,7 +161,6 @@ const Index = () => {
       timestamp: new Date().toISOString(),
     };
 
-    // Update the active session with the new message
     const updatedSession = {
       ...activeSession,
       messages: [...activeSession.messages, userMessage],
@@ -175,16 +172,13 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      // Simulate AI response
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       let aiResponse: Message;
       
-      // Check if this is a special command
       const lowerCaseInput = messageContent.trim().toLowerCase();
       
       if (lowerCaseInput.includes("find companies") || lowerCaseInput.includes("search companies")) {
-        // For demo purposes, return sample companies
         aiResponse = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
@@ -221,7 +215,6 @@ const Index = () => {
           timestamp: new Date().toISOString(),
         };
         
-        // Trigger download
         if (lastCompanyList.length > 0) {
           setTimeout(() => {
             downloadExcel(lastCompanyList);
@@ -230,7 +223,6 @@ const Index = () => {
           aiResponse.content = "I don't have any list data to download. Please search for companies or CEOs first.";
         }
       } else {
-        // Regular response
         aiResponse = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
@@ -239,7 +231,6 @@ const Index = () => {
         };
       }
       
-      // Update the session title based on the first user message
       const shouldUpdateTitle = updatedSession.messages.length === 1 && updatedSession.title === "New Chat";
       
       const finalUpdatedSession = {
@@ -265,7 +256,6 @@ const Index = () => {
     }
   };
 
-  // Maintain original handleSendMessage but delegate to the new function
   const handleSendMessage = () => {
     sendMessage();
   };
@@ -283,7 +273,6 @@ const Index = () => {
   };
 
   const getSessionTitle = (message: string) => {
-    // Create a simple title from the first user message
     return message.length > 30 ? `${message.substring(0, 30)}...` : message;
   };
 
@@ -324,7 +313,6 @@ const Index = () => {
   };
 
   const deleteSession = (sessionId: string) => {
-    // Don't do anything if this is the last session
     if (sessions.length <= 1) {
       return;
     }
@@ -356,7 +344,6 @@ const Index = () => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-slate-900">
-      {/* Side Panel */}
       {isSidePanelOpen && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden" onClick={toggleSidePanel} />
       )}
@@ -370,9 +357,7 @@ const Index = () => {
         onDeleteSession={deleteSession}
       />
 
-      {/* Main Content */}
       <div className="flex flex-col flex-1 h-full overflow-hidden relative">
-        {/* Floating New Chat Button - Mobile */}
         {!isSidePanelOpen && (
           <div className="fixed top-20 left-4 z-20 md:hidden">
             <Button
@@ -386,7 +371,6 @@ const Index = () => {
           </div>
         )}
 
-        {/* Header */}
         <header className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-10 shadow-sm">
           <div className="flex items-center">
             <Button
@@ -482,7 +466,6 @@ const Index = () => {
           </div>
         </header>
 
-        {/* Messages Container */}
         <div 
           ref={messageContainerRef}
           className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-slate-900"
@@ -567,7 +550,6 @@ const Index = () => {
           )}
         </div>
 
-        {/* Input Area */}
         <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
           <div className="max-w-3xl mx-auto relative">
             <Tabs defaultValue="chat" className="w-full">
@@ -655,7 +637,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Chat History Modal */}
       <ChatHistoryModal
         isOpen={isChatHistoryModalOpen}
         onClose={() => setIsChatHistoryModalOpen(false)}
