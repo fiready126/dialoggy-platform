@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +33,6 @@ import * as XLSX from 'xlsx';
 
 const DEFAULT_SYSTEM_MESSAGE = "You are a helpful, creative, and concise assistant. When asked about companies or CEOs, provide detailed information in a structured format.";
 
-// Sample company data for demonstration
 const SAMPLE_COMPANIES: CompanyData[] = [
   {
     id: "1",
@@ -103,7 +101,6 @@ const SAMPLE_COMPANIES: CompanyData[] = [
   }
 ];
 
-// Sample job data for demonstration
 const SAMPLE_JOBS: JobData[] = [
   {
     id: "1",
@@ -157,7 +154,6 @@ const SAMPLE_JOBS: JobData[] = [
   }
 ];
 
-// Sample investor data for demonstration
 const SAMPLE_INVESTORS: InvestorData[] = [
   {
     id: "1",
@@ -261,9 +257,7 @@ const Index = () => {
   };
 
   const findJobs = (companyName: string) => {
-    // Filter out previous job search messages
     const filteredMessages = activeSession.messages.filter(message => {
-      // Remove messages that are job searches or job results
       const isJobSearch = message.role === "user" && 
         (message.content.toLowerCase().includes("find jobs") || 
          message.content.toLowerCase().includes("search jobs"));
@@ -287,7 +281,6 @@ const Index = () => {
     updateSessionInList(updatedSession);
     setIsLoading(true);
 
-    // Filter jobs by company name
     const filteredJobs = SAMPLE_JOBS.filter(job => 
       job.companyName.toLowerCase().includes(companyName.toLowerCase())
     );
@@ -314,9 +307,7 @@ const Index = () => {
   };
 
   const findInvestors = (companyName: string) => {
-    // Filter out previous investor search messages
     const filteredMessages = activeSession.messages.filter(message => {
-      // Remove messages that are investor searches or investor results
       const isInvestorSearch = message.role === "user" && 
         (message.content.toLowerCase().includes("find investors") || 
          message.content.toLowerCase().includes("search investors"));
@@ -340,7 +331,6 @@ const Index = () => {
     updateSessionInList(updatedSession);
     setIsLoading(true);
 
-    // Filter investors by company name
     const filteredInvestors = SAMPLE_INVESTORS.filter(investor => 
       investor.companyName.toLowerCase().includes(companyName.toLowerCase())
     );
@@ -385,7 +375,6 @@ const Index = () => {
     let updatedMessages = [...activeSession.messages];
     const lowerCaseInput = messageContent.trim().toLowerCase();
     
-    // Filter out previous job/investor searches if requesting jobs or investors
     if (lowerCaseInput.includes("find jobs") || lowerCaseInput.includes("search jobs")) {
       updatedMessages = updatedMessages.filter(message => {
         const isJobSearch = message.role === "user" && 
@@ -451,7 +440,6 @@ const Index = () => {
         };
         setLastCompanyList(ceoList);
       } else if (lowerCaseInput.includes("find jobs") || lowerCaseInput.includes("search jobs")) {
-        // Extract company name if present in the query
         let companyNameMatch = messageContent.match(/find jobs in (.*)/i) || messageContent.match(/search jobs in (.*)/i);
         let filteredJobs = SAMPLE_JOBS;
         
@@ -471,7 +459,6 @@ const Index = () => {
         };
         setLastJobList(filteredJobs);
       } else if (lowerCaseInput.includes("find investors") || lowerCaseInput.includes("search investors")) {
-        // Extract company name if present in the query
         let companyNameMatch = messageContent.match(/find investors in (.*)/i) || messageContent.match(/search investors in (.*)/i);
         let filteredInvestors = SAMPLE_INVESTORS;
         
@@ -842,11 +829,11 @@ const Index = () => {
               </div>
             </div>
           ) : (
-            // Display chat messages
-            activeSession.messages.map((message) => (
+            activeSession.messages.map((message, index) => (
               <ChatMessage 
                 key={message.id} 
                 message={message}
+                isLastMessage={index === activeSession.messages.length - 1}
                 onFindJobs={findJobs}
                 onFindInvestors={findInvestors}
               />
@@ -880,7 +867,6 @@ const Index = () => {
                 onKeyDown={handleKeyDown}
                 placeholder="Type a message..."
                 className="min-h-[60px] w-full resize-none rounded-lg border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 focus-visible:ring-purple-500 dark:focus-visible:ring-purple-400 shadow-sm"
-                maxRows={5}
                 disabled={isLoading}
               />
               

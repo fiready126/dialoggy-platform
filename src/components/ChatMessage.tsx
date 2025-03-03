@@ -14,7 +14,7 @@ import { InvestorsTable } from "./InvestorsTable";
 
 interface ChatMessageProps {
   message: Message;
-  isLastMessage: boolean;
+  isLastMessage?: boolean; // Make this prop optional
   isLoading?: boolean;
   onFindJobs?: (companyName: string) => void;
   onFindInvestors?: (companyName: string) => void;
@@ -22,7 +22,7 @@ interface ChatMessageProps {
 
 const ChatMessage = ({ 
   message, 
-  isLastMessage, 
+  isLastMessage = false, // Provide a default value
   isLoading = false,
   onFindJobs,
   onFindInvestors
