@@ -26,18 +26,24 @@ import {
   Send,
   X,
   Check,
+  Briefcase,
+  DollarSign
 } from "lucide-react";
 
 interface CompanyModalProps {
   company: CompanyData;
   isOpen: boolean;
   onClose: () => void;
+  onFindJobs?: (companyName: string) => void;
+  onFindInvestors?: (companyName: string) => void;
 }
 
 export const CompanyModal = ({
   company,
   isOpen,
   onClose,
+  onFindJobs,
+  onFindInvestors
 }: CompanyModalProps) => {
   const [ceoEmailModalOpen, setCeoEmailModalOpen] = useState(false);
   const [emailSubject, setEmailSubject] = useState(`Regarding ${company.name}`);
@@ -162,6 +168,28 @@ export const CompanyModal = ({
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* New buttons for Jobs and Investors */}
+              <div className="flex space-x-2 pt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full flex items-center gap-2"
+                  onClick={() => onFindJobs && onFindJobs(company.name)}
+                >
+                  <Briefcase className="h-4 w-4 text-blue-500" />
+                  Find Jobs
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full flex items-center gap-2"
+                  onClick={() => onFindInvestors && onFindInvestors(company.name)}
+                >
+                  <DollarSign className="h-4 w-4 text-green-500" />
+                  Find Investors
+                </Button>
               </div>
             </div>
 
