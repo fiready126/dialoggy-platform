@@ -260,6 +260,16 @@ const Index = () => {
   };
 
   const findJobs = (companyName: string) => {
+    // Filter out previous job search messages
+    const filteredMessages = activeSession.messages.filter(message => {
+      // Remove messages that are job searches or job results
+      const isJobSearch = message.role === "user" && 
+        (message.content.toLowerCase().includes("find jobs") || 
+         message.content.toLowerCase().includes("search jobs"));
+      const isJobResult = message.role === "assistant" && message.jobs;
+      return !(isJobSearch || isJobResult);
+    });
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -269,7 +279,7 @@ const Index = () => {
 
     const updatedSession = {
       ...activeSession,
-      messages: [...activeSession.messages, userMessage],
+      messages: [...filteredMessages, userMessage],
     };
     
     setActiveSession(updatedSession);
@@ -303,6 +313,16 @@ const Index = () => {
   };
 
   const findInvestors = (companyName: string) => {
+    // Filter out previous investor search messages
+    const filteredMessages = activeSession.messages.filter(message => {
+      // Remove messages that are investor searches or investor results
+      const isInvestorSearch = message.role === "user" && 
+        (message.content.toLowerCase().includes("find investors") || 
+         message.content.toLowerCase().includes("search investors"));
+      const isInvestorResult = message.role === "assistant" && message.investors;
+      return !(isInvestorSearch || isInvestorResult);
+    });
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -312,7 +332,7 @@ const Index = () => {
 
     const updatedSession = {
       ...activeSession,
-      messages: [...activeSession.messages, userMessage],
+      messages: [...filteredMessages, userMessage],
     };
     
     setActiveSession(updatedSession);
@@ -361,9 +381,31 @@ const Index = () => {
       timestamp: new Date().toISOString(),
     };
 
+    let updatedMessages = [...activeSession.messages];
+    const lowerCaseInput = messageContent.trim().toLowerCase();
+    
+    // Filter out previous job/investor searches if requesting jobs or investors
+    if (lowerCaseInput.includes("find jobs") || lowerCaseInput.includes("search jobs")) {
+      updatedMessages = updatedMessages.filter(message => {
+        const isJobSearch = message.role === "user" && 
+          (message.content.toLowerCase().includes("find jobs") || 
+           message.content.toLowerCase().includes("search jobs"));
+        const isJobResult = message.role === "assistant" && message.jobs;
+        return !(isJobSearch || isJobResult);
+      });
+    } else if (lowerCaseInput.includes("find investors") || lowerCaseInput.includes("search investors")) {
+      updatedMessages = updatedMessages.filter(message => {
+        const isInvestorSearch = message.role === "user" && 
+          (message.content.toLowerCase().includes("find investors") || 
+           message.content.toLowerCase().includes("search investors"));
+        const isInvestorResult = message.role === "assistant" && message.investors;
+        return !(isInvestorSearch || isInvestorResult);
+      });
+    }
+
     const updatedSession = {
       ...activeSession,
-      messages: [...activeSession.messages, userMessage],
+      messages: [...updatedMessages, userMessage],
     };
     
     setActiveSession(updatedSession);
@@ -775,82 +817,4 @@ const Index = () => {
                   className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all hover:translate-y-[-2px] hover:border-green-200 dark:hover:border-green-800 cursor-pointer"
                   onClick={() => handleQuestionSelect("Download list")}
                 >
-                  <div className="mb-3 p-2 bg-green-50 dark:bg-green-900/30 rounded-lg w-fit">
-                    <Download className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">Download List</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Export your last search results to Excel
-                  </p>
-                </div>
-                
-                <div 
-                  className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all hover:translate-y-[-2px] hover:border-amber-200 dark:hover:border-amber-800 cursor-pointer"
-                  onClick={() => handleQuestionSelect("Tell me about Green Energy Solutions")}
-                >
-                  <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg w-fit">
-                    <Building className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">Company Research</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Get detailed reports on specific companies
-                  </p>
-                </div>
-              </div>
-            </div>
-          
-          ) : (
-            activeSession.messages.map((message) => (
-              <ChatMessage 
-                key={message.id} 
-                message={message} 
-                isLastMessage={message.id === activeSession.messages[activeSession.messages.length - 1].id}
-                isLoading={isLoading && message.id === activeSession.messages[activeSession.messages.length - 1].id}
-                onFindJobs={findJobs}
-                onFindInvestors={findInvestors}
-              />
-            ))
-          )}
-        </div>
-
-        <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80">
-          <div className="relative max-w-4xl mx-auto">
-            <ChatHistoryModal 
-              isOpen={isChatHistoryModalOpen} 
-              onClose={() => setIsChatHistoryModalOpen(false)}
-              sessions={sessions}
-              activeSessionId={activeSession.id}
-              onSwitchSession={switchSession}
-              onDeleteSession={deleteSession}
-            />
-            
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask a question or type a command..."
-              className="min-h-12 w-full rounded-xl border border-gray-300 dark:border-gray-700 shadow-sm py-3 pr-12 resize-none"
-              rows={1}
-            />
-            
-            <Button
-              size="icon"
-              onClick={handleSendMessage}
-              disabled={!input.trim() || isLoading}
-              className="absolute right-2 bottom-1 rounded-lg p-1 h-10 w-10"
-            >
-              <Send className="h-5 w-5" />
-            </Button>
-          </div>
-          
-          <div className="mt-2 flex justify-center">
-            <QuestionHint onSelectQuestion={handleQuestionSelect} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Index;
+                  <div className="mb-3 p-2 bg-green-50 dark:bg-green-900/3

@@ -54,29 +54,37 @@ export const InvestorsTable = ({ investors }: InvestorsTableProps) => {
                     index % 2 === 0 ? 'bg-white dark:bg-slate-950' : 'bg-gray-50/50 dark:bg-slate-900/50'
                   }`}
                 >
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-md">
-                      <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-md">
+                        <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      </div>
+                      <span className="font-medium">{investor.name}</span>
                     </div>
-                    <span className="font-medium">{investor.name}</span>
                   </td>
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
-                      <Building className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
+                        <Building className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <span>{investor.companyName}</span>
                     </div>
-                    {investor.companyName}
                   </td>
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-md">
-                      <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-md">
+                        <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <span>{investor.country}</span>
                     </div>
-                    {investor.country}
                   </td>
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-md">
-                      <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-md">
+                        <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <span>{investor.funding}</span>
                     </div>
-                    {investor.funding}
                   </td>
                 </tr>
               ))}

@@ -55,35 +55,45 @@ export const JobsTable = ({ jobs }: JobsTableProps) => {
                     index % 2 === 0 ? 'bg-white dark:bg-slate-950' : 'bg-gray-50/50 dark:bg-slate-900/50'
                   }`}
                 >
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-md">
-                      <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-md">
+                        <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <span className="font-medium">{job.title}</span>
                     </div>
-                    <span className="font-medium">{job.title}</span>
                   </td>
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
-                      <Building className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
+                        <Building className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <span>{job.companyName}</span>
                     </div>
-                    {job.companyName}
                   </td>
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-md">
-                      <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-md">
+                        <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      </div>
+                      <span>{job.salary}</span>
                     </div>
-                    {job.salary}
                   </td>
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-purple-100 dark:bg-purple-900/50 rounded-md">
-                      <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-purple-100 dark:bg-purple-900/50 rounded-md">
+                        <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <span>{job.type}</span>
                     </div>
-                    {job.type}
                   </td>
-                  <td className="px-4 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-md">
-                      <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-md">
+                        <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <span>{job.location}</span>
                     </div>
-                    {job.location}
                   </td>
                 </tr>
               ))}
