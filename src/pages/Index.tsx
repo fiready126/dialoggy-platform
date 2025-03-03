@@ -1,4 +1,4 @@
-<lov-code>
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -816,4 +816,43 @@ const Index = () => {
       </div>
 
       
-      <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-90
+      <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80">
+        <div className="relative max-w-4xl mx-auto">
+          <ChatHistoryModal 
+            isOpen={isChatHistoryModalOpen} 
+            onClose={() => setIsChatHistoryModalOpen(false)}
+            sessions={sessions}
+            activeSessionId={activeSession.id}
+            onSwitchSession={switchSession}
+            onDeleteSession={deleteSession}
+          />
+          
+          <Textarea
+            ref={textareaRef}
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask a question or type a command..."
+            className="min-h-12 w-full rounded-xl border border-gray-300 dark:border-gray-700 shadow-sm py-3 pr-12 resize-none"
+            rows={1}
+          />
+          
+          <Button
+            size="icon"
+            onClick={handleSendMessage}
+            disabled={!input.trim() || isLoading}
+            className="absolute right-2 bottom-1 rounded-lg p-1 h-10 w-10"
+          >
+            <Send className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <div className="mt-2 flex justify-center">
+          <QuestionHint onSelect={handleQuestionSelect} isVisible={activeSession.messages.length > 0} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Index;
