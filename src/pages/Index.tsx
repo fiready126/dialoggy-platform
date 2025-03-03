@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -817,4 +818,90 @@ const Index = () => {
                   className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all hover:translate-y-[-2px] hover:border-green-200 dark:hover:border-green-800 cursor-pointer"
                   onClick={() => handleQuestionSelect("Download list")}
                 >
-                  <div className="mb-3 p-2 bg-green-50 dark:bg-green-900/3
+                  <div className="mb-3 p-2 bg-green-50 dark:bg-green-900/30 rounded-lg w-fit">
+                    <Download className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">Download Data</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Export data into a downloadable Excel file
+                  </p>
+                </div>
+                
+                <div 
+                  className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all hover:translate-y-[-2px] hover:border-orange-200 dark:hover:border-orange-800 cursor-pointer"
+                  onClick={() => handleQuestionSelect("Find Jobs in TechVision Inc.")}
+                >
+                  <div className="mb-3 p-2 bg-orange-50 dark:bg-orange-900/30 rounded-lg w-fit">
+                    <Building className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">Find Jobs</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Search for job opportunities in specific companies
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Display chat messages
+            activeSession.messages.map((message) => (
+              <ChatMessage 
+                key={message.id} 
+                message={message}
+                onFindJobs={findJobs}
+                onFindInvestors={findInvestors}
+              />
+            ))
+          )}
+          
+          {isLoading && (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-purple-500"></div>
+              <span className="ml-3 text-muted-foreground">Thinking...</span>
+            </div>
+          )}
+        </div>
+
+        <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md">
+          <div className="max-w-3xl mx-auto flex flex-col">
+            <ChatHistoryModal 
+              isOpen={isChatHistoryModalOpen} 
+              onClose={() => setIsChatHistoryModalOpen(false)}
+              sessions={sessions}
+              activeSessionId={activeSession.id}
+              onSwitchSession={switchSession}
+              onDeleteSession={deleteSession}
+            />
+            
+            <div className="flex w-full items-end gap-2">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Type a message..."
+                className="min-h-[60px] w-full resize-none rounded-lg border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 focus-visible:ring-purple-500 dark:focus-visible:ring-purple-400 shadow-sm"
+                maxRows={5}
+                disabled={isLoading}
+              />
+              
+              <Button
+                disabled={isLoading || input.trim() === ""}
+                onClick={handleSendMessage}
+                className={cn(
+                  "rounded-full h-10 w-10 p-0 shrink-0 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-colors",
+                  isLoading && "opacity-50 cursor-not-allowed"
+                )}
+                aria-label="Send message"
+                type="submit"
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Index;
