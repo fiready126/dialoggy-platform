@@ -5,6 +5,8 @@ export interface Message {
   content: string;
   timestamp: string;
   companies?: CompanyData[]; // For company list results
+  jobs?: JobData[]; // For job listings
+  investors?: InvestorData[]; // For investor listings
 }
 
 export interface ChatSession {
@@ -33,5 +35,27 @@ export interface CompanyData {
     rank: number;
   };
   logo?: string;
+  description?: string;
+}
+
+export interface JobData {
+  id: string;
+  title: string;
+  companyName: string;
+  salary: string;
+  type: string;
+  location: string;
+  description?: string;
+  postedDate?: string;
+}
+
+export interface InvestorData {
+  id: string;
+  name: string;
+  companyName: string;
+  country: string;
+  funding: string;
+  investmentStage?: string;
+  portfolio?: string;
   description?: string;
 }

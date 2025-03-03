@@ -9,14 +9,24 @@ import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { CompanyTable } from "./CompanyTable";
+import { JobsTable } from "./JobsTable";
+import { InvestorsTable } from "./InvestorsTable";
 
 interface ChatMessageProps {
   message: Message;
   isLastMessage: boolean;
   isLoading?: boolean;
+  onFindJobs?: (companyName: string) => void;
+  onFindInvestors?: (companyName: string) => void;
 }
 
-const ChatMessage = ({ message, isLastMessage, isLoading = false }: ChatMessageProps) => {
+const ChatMessage = ({ 
+  message, 
+  isLastMessage, 
+  isLoading = false,
+  onFindJobs,
+  onFindInvestors
+}: ChatMessageProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
   const isUser = message.role === "user";
@@ -119,7 +129,25 @@ const ChatMessage = ({ message, isLastMessage, isLoading = false }: ChatMessageP
                 {/* Render company table if message has companies */}
                 {!isUser && message.companies && message.companies.length > 0 && (
                   <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
-                    <CompanyTable companies={message.companies} />
+                    <CompanyTable 
+                      companies={message.companies} 
+                      onFindJobs={onFindJobs}
+                      onFindInvestors={onFindInvestors}
+                    />
+                  </div>
+                )}
+
+                {/* Render jobs table if message has jobs */}
+                {!isUser && message.jobs && message.jobs.length > 0 && (
+                  <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
+                    <JobsTable jobs={message.jobs} />
+                  </div>
+                )}
+
+                {/* Render investors table if message has investors */}
+                {!isUser && message.investors && message.investors.length > 0 && (
+                  <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
+                    <InvestorsTable investors={message.investors} />
                   </div>
                 )}
               </>

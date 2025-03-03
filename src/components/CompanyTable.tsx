@@ -2,15 +2,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CompanyData } from "@/types/chat";
-import { Download, ExternalLink, Building, User, Globe, ChevronRight, Filter } from "lucide-react";
+import { Download, ExternalLink, Building, User, Globe, ChevronRight, Filter, Briefcase, TrendingUp } from "lucide-react";
 import { CompanyModal } from "./CompanyModal";
 import * as XLSX from 'xlsx';
 
 interface CompanyTableProps {
   companies: CompanyData[];
+  onFindJobs?: (companyName: string) => void;
+  onFindInvestors?: (companyName: string) => void;
 }
 
-export const CompanyTable = ({ companies }: CompanyTableProps) => {
+export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: CompanyTableProps) => {
   const [selectedCompany, setSelectedCompany] = useState<CompanyData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -24,6 +26,20 @@ export const CompanyTable = ({ companies }: CompanyTableProps) => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Companies");
     XLSX.writeFile(workbook, "company-list.xlsx");
+  };
+
+  const handleFindJobs = (e: React.MouseEvent, companyName: string) => {
+    e.stopPropagation();
+    if (onFindJobs) {
+      onFindJobs(companyName);
+    }
+  };
+
+  const handleFindInvestors = (e: React.MouseEvent, companyName: string) => {
+    e.stopPropagation();
+    if (onFindInvestors) {
+      onFindInvestors(companyName);
+    }
   };
 
   return (
@@ -54,7 +70,7 @@ export const CompanyTable = ({ companies }: CompanyTableProps) => {
                 <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">CEO</th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Website</th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Location</th>
-                <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 w-[50px]">View</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300" colSpan={3}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -95,7 +111,29 @@ export const CompanyTable = ({ companies }: CompanyTableProps) => {
                     </a>
                   </td>
                   <td className="px-4 py-3">{company.location}</td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-2 py-3 text-center">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-800/50"
+                      onClick={(e) => handleFindJobs(e, company.name)}
+                    >
+                      <Briefcase className="h-4 w-4 mr-1" />
+                      Find Jobs
+                    </Button>
+                  </td>
+                  <td className="px-2 py-3 text-center">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full bg-green-50 text-green-600 border-green-200 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 dark:hover:bg-green-800/50"
+                      onClick={(e) => handleFindInvestors(e, company.name)}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      Find Investors
+                    </Button>
+                  </td>
+                  <td className="px-2 py-3 text-center">
                     <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-full hover:bg-green-200 dark:hover:bg-green-800/50 transition-colors inline-flex">
                       <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />
                     </div>

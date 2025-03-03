@@ -1,3 +1,4 @@
+<lov-code>
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,7 +24,7 @@ import { cn } from "@/lib/utils";
 import ChatMessage from "@/components/ChatMessage";
 import SidePanel from "@/components/SidePanel";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ChatSession, Message, CompanyData } from "@/types/chat";
+import { ChatSession, Message, CompanyData, JobData, InvestorData } from "@/types/chat";
 import { useToast } from "@/components/ui/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { QuestionHint } from "@/components/QuestionHint";
@@ -102,6 +103,114 @@ const SAMPLE_COMPANIES: CompanyData[] = [
   }
 ];
 
+// Sample job data for demonstration
+const SAMPLE_JOBS: JobData[] = [
+  {
+    id: "1",
+    title: "Senior Frontend Developer",
+    companyName: "TechVision Inc.",
+    salary: "$120,000 - $150,000",
+    type: "Full-time",
+    location: "San Francisco, CA",
+    description: "We're looking for an experienced Frontend Developer to join our team.",
+    postedDate: "2023-05-15"
+  },
+  {
+    id: "2",
+    title: "Product Manager",
+    companyName: "TechVision Inc.",
+    salary: "$130,000 - $160,000",
+    type: "Full-time",
+    location: "Remote",
+    description: "Lead product development and strategy.",
+    postedDate: "2023-05-10"
+  },
+  {
+    id: "3",
+    title: "UI/UX Designer",
+    companyName: "Green Energy Solutions",
+    salary: "$90,000 - $110,000",
+    type: "Full-time",
+    location: "Austin, TX",
+    description: "Create beautiful and intuitive user experiences.",
+    postedDate: "2023-05-05"
+  },
+  {
+    id: "4",
+    title: "DevOps Engineer",
+    companyName: "HealthPlus",
+    salary: "$115,000 - $140,000",
+    type: "Full-time",
+    location: "Boston, MA",
+    description: "Manage and optimize our cloud infrastructure.",
+    postedDate: "2023-05-01"
+  },
+  {
+    id: "5",
+    title: "Financial Analyst",
+    companyName: "Global Finance Group",
+    salary: "$85,000 - $105,000",
+    type: "Full-time",
+    location: "New York, NY",
+    description: "Analyze financial data and create reports.",
+    postedDate: "2023-04-28"
+  }
+];
+
+// Sample investor data for demonstration
+const SAMPLE_INVESTORS: InvestorData[] = [
+  {
+    id: "1",
+    name: "Sequoia Capital",
+    companyName: "TechVision Inc.",
+    country: "United States",
+    funding: "$25M Series A",
+    investmentStage: "Series A",
+    portfolio: "Airbnb, Dropbox, Google",
+    description: "Leading venture capital firm focused on technology investments."
+  },
+  {
+    id: "2",
+    name: "Andreessen Horowitz",
+    companyName: "TechVision Inc.",
+    country: "United States",
+    funding: "$15M Seed",
+    investmentStage: "Seed",
+    portfolio: "Facebook, Twitter, GitHub",
+    description: "Major venture capital firm specializing in technology startups."
+  },
+  {
+    id: "3",
+    name: "Kleiner Perkins",
+    companyName: "Green Energy Solutions",
+    country: "United States",
+    funding: "$20M Series B",
+    investmentStage: "Series B",
+    portfolio: "Amazon, Google, Spotify",
+    description: "Venture capital firm focusing on early-stage investments."
+  },
+  {
+    id: "4",
+    name: "Accel Partners",
+    companyName: "HealthPlus",
+    country: "United Kingdom",
+    funding: "$30M Series C",
+    investmentStage: "Series C",
+    portfolio: "Facebook, Slack, Dropbox",
+    description: "Global venture capital firm that invests in startups."
+  },
+  {
+    id: "5",
+    name: "SoftBank Vision Fund",
+    companyName: "Global Finance Group",
+    country: "Japan",
+    funding: "$50M Late Stage",
+    investmentStage: "Late Stage",
+    portfolio: "Uber, WeWork, DoorDash",
+    description: "Largest technology-focused investment fund."
+  }
+];
+
 const Index = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -117,6 +226,8 @@ const Index = () => {
   });
   const [sessions, setSessions] = useState<ChatSession[]>([activeSession]);
   const [lastCompanyList, setLastCompanyList] = useState<CompanyData[]>([]);
+  const [lastJobList, setLastJobList] = useState<JobData[]>([]);
+  const [lastInvestorList, setLastInvestorList] = useState<InvestorData[]>([]);
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useIsMobile();
@@ -147,6 +258,96 @@ const Index = () => {
 
   const handleQuestionSelect = (question: string) => {
     sendMessage(question);
+  };
+
+  const findJobs = (companyName: string) => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: `Find Jobs in ${companyName}`,
+      timestamp: new Date().toISOString(),
+    };
+
+    const updatedSession = {
+      ...activeSession,
+      messages: [...activeSession.messages, userMessage],
+    };
+    
+    setActiveSession(updatedSession);
+    updateSessionInList(updatedSession);
+    setIsLoading(true);
+
+    // Filter jobs by company name
+    const filteredJobs = SAMPLE_JOBS.filter(job => 
+      job.companyName.toLowerCase().includes(companyName.toLowerCase())
+    );
+    
+    setTimeout(() => {
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `Here are the job listings for ${companyName}:`,
+        timestamp: new Date().toISOString(),
+        jobs: filteredJobs
+      };
+      
+      const finalUpdatedSession = {
+        ...updatedSession,
+        messages: [...updatedSession.messages, aiResponse],
+      };
+      
+      setActiveSession(finalUpdatedSession);
+      updateSessionInList(finalUpdatedSession);
+      setLastJobList(filteredJobs);
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const findInvestors = (companyName: string) => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: `Find Investors in ${companyName}`,
+      timestamp: new Date().toISOString(),
+    };
+
+    const updatedSession = {
+      ...activeSession,
+      messages: [...activeSession.messages, userMessage],
+    };
+    
+    setActiveSession(updatedSession);
+    updateSessionInList(updatedSession);
+    setIsLoading(true);
+
+    // Filter investors by company name
+    const filteredInvestors = SAMPLE_INVESTORS.filter(investor => 
+      investor.companyName.toLowerCase().includes(companyName.toLowerCase())
+    );
+    
+    setTimeout(() => {
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `Here are the investors for ${companyName}:`,
+        timestamp: new Date().toISOString(),
+        investors: filteredInvestors
+      };
+      
+      const finalUpdatedSession = {
+        ...updatedSession,
+        messages: [...updatedSession.messages, aiResponse],
+      };
+      
+      setActiveSession(finalUpdatedSession);
+      updateSessionInList(finalUpdatedSession);
+      setLastInvestorList(filteredInvestors);
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const handleSendMessage = () => {
+    sendMessage();
   };
 
   const sendMessage = async (content?: string) => {
@@ -207,6 +408,46 @@ const Index = () => {
           companies: ceoList
         };
         setLastCompanyList(ceoList);
+      } else if (lowerCaseInput.includes("find jobs") || lowerCaseInput.includes("search jobs")) {
+        // Extract company name if present in the query
+        let companyNameMatch = messageContent.match(/find jobs in (.*)/i) || messageContent.match(/search jobs in (.*)/i);
+        let filteredJobs = SAMPLE_JOBS;
+        
+        if (companyNameMatch && companyNameMatch[1]) {
+          const companyName = companyNameMatch[1].trim();
+          filteredJobs = SAMPLE_JOBS.filter(job => 
+            job.companyName.toLowerCase().includes(companyName.toLowerCase())
+          );
+        }
+        
+        aiResponse = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Here are the job listings matching your search criteria:",
+          timestamp: new Date().toISOString(),
+          jobs: filteredJobs
+        };
+        setLastJobList(filteredJobs);
+      } else if (lowerCaseInput.includes("find investors") || lowerCaseInput.includes("search investors")) {
+        // Extract company name if present in the query
+        let companyNameMatch = messageContent.match(/find investors in (.*)/i) || messageContent.match(/search investors in (.*)/i);
+        let filteredInvestors = SAMPLE_INVESTORS;
+        
+        if (companyNameMatch && companyNameMatch[1]) {
+          const companyName = companyNameMatch[1].trim();
+          filteredInvestors = SAMPLE_INVESTORS.filter(investor => 
+            investor.companyName.toLowerCase().includes(companyName.toLowerCase())
+          );
+        }
+        
+        aiResponse = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Here are the investors matching your search criteria:",
+          timestamp: new Date().toISOString(),
+          investors: filteredInvestors
+        };
+        setLastInvestorList(filteredInvestors);
       } else if (lowerCaseInput.includes("download list")) {
         aiResponse = {
           id: (Date.now() + 1).toString(),
@@ -219,8 +460,32 @@ const Index = () => {
           setTimeout(() => {
             downloadExcel(lastCompanyList);
           }, 500);
+        } else if (lastJobList.length > 0) {
+          setTimeout(() => {
+            const worksheet = XLSX.utils.json_to_sheet(lastJobList);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Jobs");
+            XLSX.writeFile(workbook, "job-list.xlsx");
+            
+            toast({
+              title: "Download complete",
+              description: "The Jobs Excel file has been downloaded successfully.",
+            });
+          }, 500);
+        } else if (lastInvestorList.length > 0) {
+          setTimeout(() => {
+            const worksheet = XLSX.utils.json_to_sheet(lastInvestorList);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Investors");
+            XLSX.writeFile(workbook, "investor-list.xlsx");
+            
+            toast({
+              title: "Download complete",
+              description: "The Investors Excel file has been downloaded successfully.",
+            });
+          }, 500);
         } else {
-          aiResponse.content = "I don't have any list data to download. Please search for companies or CEOs first.";
+          aiResponse.content = "I don't have any list data to download. Please search for companies, jobs, or investors first.";
         }
       } else {
         aiResponse = {
@@ -254,10 +519,6 @@ const Index = () => {
         textareaRef.current.focus();
       }
     }
-  };
-
-  const handleSendMessage = () => {
-    sendMessage();
   };
 
   const downloadExcel = (data: CompanyData[]) => {
@@ -471,7 +732,8 @@ const Index = () => {
           className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-slate-900"
         >
           {activeSession.messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center p-4">
+          
+          <div className="flex flex-col items-center justify-center h-full text-center p-4">
               <div className="h-20 w-20 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center mb-6 shadow-lg animate-pulse">
                 <BrainCircuit className="h-10 w-10 text-white" />
               </div>
@@ -538,115 +800,20 @@ const Index = () => {
                 </div>
               </div>
             </div>
-          ) : (
-            activeSession.messages.map((message) => (
-              <ChatMessage 
-                key={message.id} 
-                message={message} 
-                isLastMessage={message.id === activeSession.messages[activeSession.messages.length - 1].id}
-                isLoading={isLoading && message.id === activeSession.messages[activeSession.messages.length - 1].id}
-              />
-            ))
-          )}
-        </div>
-
-        <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
-          <div className="max-w-3xl mx-auto relative">
-            <Tabs defaultValue="chat" className="w-full">
-              <div className="flex items-center justify-between mb-3">
-                <TabsList className="grid w-[240px] grid-cols-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                  <TabsTrigger value="chat" className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm transition-all">Chat</TabsTrigger>
-                  <TabsTrigger value="system" className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm transition-all">System</TabsTrigger>
-                </TabsList>
-              </div>
-              
-              <TabsContent value="chat" className="mt-0">
-                <div className="relative">
-                  <Textarea
-                    ref={textareaRef}
-                    value={input}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Ask me anything..."
-                    className="min-h-[80px] resize-none pr-24 bg-white dark:bg-gray-800 rounded-xl border-gray-200 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all"
-                    disabled={isLoading}
-                  />
-                  <div className="absolute right-3 bottom-3 flex items-center gap-2">
-                    <QuestionHint onSelectQuestion={handleQuestionSelect} />
-                    
-                    <Button
-                      className={cn(
-                        "h-9 px-4 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all",
-                        (!input.trim() || isLoading) && "opacity-70"
-                      )}
-                      onClick={handleSendMessage}
-                      disabled={!input.trim() || isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          Send
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="flex justify-center">
-                  <p className="text-xs text-center text-muted-foreground mt-3 bg-gray-50 dark:bg-gray-800/50 px-3 py-1 rounded-full">
-                    AI may produce inaccurate information about people, places, or facts.
-                  </p>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="system" className="mt-0">
-                <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg mb-3">
-                  <h3 className="text-sm font-medium mb-2">System Message</h3>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    This message helps set the behavior and capabilities of the AI assistant.
-                  </p>
-                </div>
-                
-                <Textarea
-                  value={activeSession.systemMessage}
-                  onChange={(e) => {
-                    const updatedSession = {
-                      ...activeSession,
-                      systemMessage: e.target.value,
-                    };
-                    setActiveSession(updatedSession);
-                    updateSessionInList(updatedSession);
-                  }}
-                  placeholder="System message..."
-                  className="min-h-[120px] resize-none bg-white dark:bg-gray-800 rounded-xl border-gray-200 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all"
-                />
-                
-                <div className="flex justify-center">
-                  <p className="text-xs text-center text-muted-foreground mt-3 bg-gray-50 dark:bg-gray-800/50 px-3 py-1 rounded-full">
-                    Changes to the system message will affect the assistant's behavior in future interactions.
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+          
+        ) : (
+          activeSession.messages.map((message) => (
+            <ChatMessage 
+              key={message.id} 
+              message={message} 
+              isLastMessage={message.id === activeSession.messages[activeSession.messages.length - 1].id}
+              isLoading={isLoading && message.id === activeSession.messages[activeSession.messages.length - 1].id}
+              onFindJobs={findJobs}
+              onFindInvestors={findInvestors}
+            />
+          ))
+        )}
       </div>
 
-      <ChatHistoryModal
-        isOpen={isChatHistoryModalOpen}
-        onClose={() => setIsChatHistoryModalOpen(false)}
-        sessions={sessions}
-        activeSessionId={activeSession.id}
-        onSwitchSession={switchSession}
-        onDeleteSession={deleteSession}
-      />
-    </div>
-  );
-};
-
-export default Index;
+      
+      <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-90
