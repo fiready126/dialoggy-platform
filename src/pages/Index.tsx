@@ -262,7 +262,12 @@ const Index = () => {
         (message.content.toLowerCase().includes("find jobs") || 
          message.content.toLowerCase().includes("search jobs"));
       const isJobResult = message.role === "assistant" && message.jobs;
-      return !(isJobSearch || isJobResult);
+      const isInvestorSearch = message.role === "user" && 
+        (message.content.toLowerCase().includes("find investors") || 
+         message.content.toLowerCase().includes("search investors"));
+      const isInvestorResult = message.role === "assistant" && message.investors;
+      
+      return !((isJobSearch || isJobResult) || (isInvestorSearch || isInvestorResult));
     });
 
     const userMessage: Message = {
@@ -308,11 +313,16 @@ const Index = () => {
 
   const findInvestors = (companyName: string) => {
     const filteredMessages = activeSession.messages.filter(message => {
+      const isJobSearch = message.role === "user" && 
+        (message.content.toLowerCase().includes("find jobs") || 
+         message.content.toLowerCase().includes("search jobs"));
+      const isJobResult = message.role === "assistant" && message.jobs;
       const isInvestorSearch = message.role === "user" && 
         (message.content.toLowerCase().includes("find investors") || 
          message.content.toLowerCase().includes("search investors"));
       const isInvestorResult = message.role === "assistant" && message.investors;
-      return !(isInvestorSearch || isInvestorResult);
+      
+      return !((isJobSearch || isJobResult) || (isInvestorSearch || isInvestorResult));
     });
 
     const userMessage: Message = {
@@ -375,21 +385,19 @@ const Index = () => {
     let updatedMessages = [...activeSession.messages];
     const lowerCaseInput = messageContent.trim().toLowerCase();
     
-    if (lowerCaseInput.includes("find jobs") || lowerCaseInput.includes("search jobs")) {
+    if (lowerCaseInput.includes("find jobs") || lowerCaseInput.includes("search jobs") ||
+        lowerCaseInput.includes("find investors") || lowerCaseInput.includes("search investors")) {
       updatedMessages = updatedMessages.filter(message => {
         const isJobSearch = message.role === "user" && 
           (message.content.toLowerCase().includes("find jobs") || 
            message.content.toLowerCase().includes("search jobs"));
         const isJobResult = message.role === "assistant" && message.jobs;
-        return !(isJobSearch || isJobResult);
-      });
-    } else if (lowerCaseInput.includes("find investors") || lowerCaseInput.includes("search investors")) {
-      updatedMessages = updatedMessages.filter(message => {
         const isInvestorSearch = message.role === "user" && 
           (message.content.toLowerCase().includes("find investors") || 
            message.content.toLowerCase().includes("search investors"));
         const isInvestorResult = message.role === "assistant" && message.investors;
-        return !(isInvestorSearch || isInvestorResult);
+        
+        return !((isJobSearch || isJobResult) || (isInvestorSearch || isInvestorResult));
       });
     }
 
