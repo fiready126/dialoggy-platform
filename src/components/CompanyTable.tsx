@@ -150,6 +150,8 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
           company={selectedCompany} 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
+          onFindJobs={onFindJobs}
+          onFindInvestors={onFindInvestors}
         />
       )}
     </div>

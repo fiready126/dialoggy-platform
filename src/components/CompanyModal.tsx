@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -99,6 +98,20 @@ export const CompanyModal = ({
     }
   };
 
+  const handleFindJobs = () => {
+    onClose(); // Close the modal first
+    if (onFindJobs) {
+      onFindJobs(company.name);
+    }
+  };
+
+  const handleFindInvestors = () => {
+    onClose(); // Close the modal first
+    if (onFindInvestors) {
+      onFindInvestors(company.name);
+    }
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -176,7 +189,7 @@ export const CompanyModal = ({
                   variant="outline" 
                   size="sm"
                   className="w-full flex items-center gap-2"
-                  onClick={() => onFindJobs && onFindJobs(company.name)}
+                  onClick={handleFindJobs}
                 >
                   <Briefcase className="h-4 w-4 text-blue-500" />
                   Find Jobs
@@ -185,7 +198,7 @@ export const CompanyModal = ({
                   variant="outline" 
                   size="sm"
                   className="w-full flex items-center gap-2"
-                  onClick={() => onFindInvestors && onFindInvestors(company.name)}
+                  onClick={handleFindInvestors}
                 >
                   <DollarSign className="h-4 w-4 text-green-500" />
                   Find Investors
