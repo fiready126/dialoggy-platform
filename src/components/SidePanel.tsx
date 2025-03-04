@@ -6,15 +6,11 @@ import {
   MessageSquare, 
   Trash2, 
   Search, 
-  ChevronLeft, 
-  Sparkles,
-  Menu,
   X,
   LayoutDashboard 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { ChatSession } from "@/types/chat";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -90,30 +86,28 @@ const SidePanel = ({
 
   return (
     <div className={cn(
-      "flex flex-col w-72 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 z-40 shadow-md relative",
+      "flex flex-col w-[235px] border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 z-40 relative",
       isMobile && "fixed h-full"
     )}>
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center p-4 h-16 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
-            <Sparkles className="h-4 w-4 text-white" />
+          <div className="bandera-logo">
+            <img 
+              src="/lovable-uploads/922b3bde-e4be-41cc-b6aa-f2b6b1676b6d.png" 
+              alt="Bandera AI Logo" 
+              className="h-6 w-6"
+            />
           </div>
-          <h2 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
-            AI Assistant
+          <h2 className="text-lg font-bold brand-gradient">
+            Bandera AI
           </h2>
         </div>
-        
-        {isMobile && (
-          <Button variant="ghost" size="icon" onClick={() => {}} className="rounded-full">
-            <X className="h-5 w-5" />
-          </Button>
-        )}
       </div>
 
-      <div className="p-4">
+      <div className="p-3">
         <Button 
           onClick={onNewSession}
-          className="w-full justify-start gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 rounded-lg py-6 shadow-md hover:shadow-lg transition-all font-medium"
+          className="w-full justify-start gap-2 bg-[#7b5ce3] hover:bg-[#6a4fd6] text-white rounded-md py-6 shadow-sm hover:shadow transition-all font-medium"
         >
           <PlusCircle className="h-5 w-5" />
           New Conversation
@@ -128,7 +122,7 @@ const SidePanel = ({
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600"
+            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7b5ce3] dark:focus:ring-[#7b5ce3]"
           />
           {searchQuery && (
             <Button
@@ -149,11 +143,9 @@ const SidePanel = ({
             filteredGroups.map(group => (
               <div key={group.date} className="mb-4">
                 <div className="flex items-center gap-2 px-3 py-2">
-                  <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-700"></div>
                   <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400">
                     {formatGroupDate(group.date)}
                   </h3>
-                  <div className="h-[1px] flex-grow bg-gray-200 dark:bg-gray-800"></div>
                 </div>
                 <div className="space-y-1">
                   {group.sessions.map(session => (
@@ -163,15 +155,12 @@ const SidePanel = ({
                       className={cn(
                         "w-full text-left px-3 py-2.5 rounded-lg flex items-center group transition-all",
                         session.id === activeSessionId
-                          ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 shadow-sm"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent"
+                          ? "bg-gray-100 dark:bg-gray-800 shadow-sm"
+                          : "hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent"
                       )}
                     >
                       <div className={cn(
-                        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mr-3",
-                        session.id === activeSessionId
-                          ? "bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-600 dark:text-blue-400"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                        "flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center mr-3 text-gray-500",
                       )}>
                         <MessageSquare className="h-4 w-4" />
                       </div>

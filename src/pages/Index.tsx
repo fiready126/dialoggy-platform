@@ -1,23 +1,21 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Send, 
   MessageSquare, 
   User, 
-  Settings, 
-  RefreshCw,
-  PanelLeft,
   Trash,
   History,
   Download,
-  BrainCircuit,
   Plus,
   ChevronLeft,
   Menu,
   Search,
-  Building
+  Building,
+  Copy,
+  Sparkles,
+  RotateCcw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ChatMessage from "@/components/ChatMessage";
@@ -641,7 +639,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-slate-900">
+    <div className="flex h-screen w-full overflow-hidden bg-[#F7F8FB] dark:from-gray-950 dark:to-slate-900">
       {isSidePanelOpen && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden" onClick={toggleSidePanel} />
       )}
@@ -657,7 +655,7 @@ const Index = () => {
 
       <div className="flex flex-col flex-1 h-full overflow-hidden relative">
         {!isSidePanelOpen && (
-          <div className="fixed top-20 left-4 z-20 md:hidden">
+          <div className="fixed top-4 left-4 z-20 md:hidden">
             <Button
               variant="outline"
               size="icon"
@@ -669,7 +667,7 @@ const Index = () => {
           </div>
         )}
 
-        <header className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-10 shadow-sm">
+        <header className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-10">
           <div className="flex items-center">
             <Button
               variant="ghost"
@@ -682,7 +680,7 @@ const Index = () => {
             </Button>
             
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400">
+              <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                 {activeSession.title}
               </h1>
             </div>
@@ -744,15 +742,19 @@ const Index = () => {
 
         <div 
           ref={messageContainerRef}
-          className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-slate-900"
+          className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-[#F7F8FB] dark:from-gray-950 dark:to-slate-900"
         >
           {activeSession.messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center p-4">
-              <div className="h-20 w-20 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center mb-6 shadow-lg animate-pulse">
-                <BrainCircuit className="h-10 w-10 text-white" />
+              <div className="h-20 w-20 rounded-full bg-gradient-to-r from-[#FF3D9A] to-[#00C8E5] flex items-center justify-center mb-6 shadow-lg">
+                <img 
+                  src="/lovable-uploads/922b3bde-e4be-41cc-b6aa-f2b6b1676b6d.png" 
+                  alt="Bandera AI Logo" 
+                  className="h-12 w-12"
+                />
               </div>
               
-              <h2 className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400">
+              <h2 className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[#7B5CE3] to-[#00C8E5]">
                 Interactive AI Assistant
               </h2>
               
@@ -828,14 +830,16 @@ const Index = () => {
           
           {isLoading && (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-purple-500"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#7B5CE3]"></div>
               <span className="ml-3 text-muted-foreground">Thinking...</span>
             </div>
           )}
+
+          <div className="h-4"></div>
         </div>
 
-        <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md">
-          <div className="max-w-3xl mx-auto flex flex-col">
+        <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+          <div className="max-w-3xl mx-auto">
             <ChatHistoryModal 
               isOpen={isChatHistoryModalOpen} 
               onClose={() => setIsChatHistoryModalOpen(false)}
@@ -851,23 +855,28 @@ const Index = () => {
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                placeholder="Type a message..."
-                className="min-h-[60px] pr-24 w-full resize-none rounded-lg border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 focus-visible:ring-purple-500 dark:focus-visible:ring-purple-400 shadow-sm"
+                placeholder="Ask me anything..."
+                className="min-h-[60px] pr-24 w-full resize-none rounded-xl border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 focus-visible:ring-[#7B5CE3] dark:focus-visible:ring-[#7B5CE3] shadow-sm"
                 disabled={isLoading}
               />
               
-              <div className="absolute right-3 flex items-center space-x-2">
-                <QuestionHint onSelectQuestion={handleQuestionSelect} />
-                <Button
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+                <div className="question-hint-button">
+                  <QuestionHint onSelectQuestion={handleQuestionSelect} />
+                </div>
+                <button
                   disabled={isLoading || input.trim() === ""}
                   onClick={handleSendMessage}
-                  className={`rounded-full h-8 w-8 p-0 shrink-0 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-colors ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`send-button h-10 w-10 ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                   aria-label="Send message"
                   type="submit"
                 >
-                  <Send className="h-4 w-4" />
-                </Button>
+                  <Send className="h-5 w-5" />
+                </button>
               </div>
+            </div>
+            <div className="text-xs text-center text-gray-400 mt-2">
+              AI may produce inaccurate information about people, places, or facts.
             </div>
           </div>
         </div>
