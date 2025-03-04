@@ -685,9 +685,6 @@ const Index = () => {
               <h1 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400">
                 {activeSession.title}
               </h1>
-              <div className="ml-3 px-2 py-1 text-xs font-medium rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                {activeSession.model}
-              </div>
             </div>
           </div>
           
@@ -742,25 +739,6 @@ const Index = () => {
             </TooltipProvider>
             
             <ThemeToggle />
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => {}}
-                    aria-label="Settings"
-                    className="rounded-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow"
-                  >
-                    <Settings className="h-5 w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Settings</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
           </div>
         </header>
 
@@ -867,29 +845,29 @@ const Index = () => {
               onDeleteSession={deleteSession}
             />
             
-            <div className="flex w-full items-end gap-2">
+            <div className="relative flex w-full items-center">
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Type a message..."
-                className="min-h-[60px] w-full resize-none rounded-lg border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 focus-visible:ring-purple-500 dark:focus-visible:ring-purple-400 shadow-sm"
+                className="min-h-[60px] pr-24 w-full resize-none rounded-lg border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 focus-visible:ring-purple-500 dark:focus-visible:ring-purple-400 shadow-sm"
                 disabled={isLoading}
               />
               
-              <Button
-                disabled={isLoading || input.trim() === ""}
-                onClick={handleSendMessage}
-                className={cn(
-                  "rounded-full h-10 w-10 p-0 shrink-0 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-colors",
-                  isLoading && "opacity-50 cursor-not-allowed"
-                )}
-                aria-label="Send message"
-                type="submit"
-              >
-                <Send className="h-5 w-5" />
-              </Button>
+              <div className="absolute right-3 flex items-center space-x-2">
+                <QuestionHint onSelectQuestion={handleQuestionSelect} />
+                <Button
+                  disabled={isLoading || input.trim() === ""}
+                  onClick={handleSendMessage}
+                  className={`rounded-full h-8 w-8 p-0 shrink-0 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-colors ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  aria-label="Send message"
+                  type="submit"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
