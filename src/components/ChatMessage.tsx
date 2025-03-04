@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageSquare, User, Copy, Check, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ import { InvestorsTable } from "./InvestorsTable";
 
 interface ChatMessageProps {
   message: Message;
-  isLastMessage?: boolean; // Make this prop optional
+  isLastMessage?: boolean;
   isLoading?: boolean;
   onFindJobs?: (companyName: string) => void;
   onFindInvestors?: (companyName: string) => void;
@@ -22,14 +22,34 @@ interface ChatMessageProps {
 
 const ChatMessage = ({ 
   message, 
-  isLastMessage = false, // Provide a default value
+  isLastMessage = false,
   isLoading = false,
   onFindJobs,
   onFindInvestors
 }: ChatMessageProps) => {
   const [isCopied, setIsCopied] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const messageRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const isUser = message.role === "user";
+
+  useEffect(() => {
+    // Start with the message invisible
+    setIsVisible(false);
+    
+    // Use requestAnimationFrame to ensure DOM is updated before animation starts
+    const animationFrame = requestAnimationFrame(() => {
+      // Force a reflow by accessing offsetHeight
+      if (messageRef.current) {
+        messageRef.current.offsetHeight;
+        
+        // Then set visible to trigger animation
+        setIsVisible(true);
+      }
+    });
+    
+    return () => cancelAnimationFrame(animationFrame);
+  }, [message.id]);
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -47,9 +67,12 @@ const ChatMessage = ({
 
   return (
     <div
+      ref={messageRef}
       className={cn(
-        "group flex animate-fade-in",
-        isUser ? "justify-end" : "justify-start"
+        "group flex",
+        isUser ? "justify-end" : "justify-start",
+        "transition-all duration-500 ease-out",
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
       )}
     >
       <div 
@@ -140,14 +163,22 @@ const ChatMessage = ({
                 {/* Render jobs table if message has jobs */}
                 {!isUser && message.jobs && message.jobs.length > 0 && (
                   <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
-                    <JobsTable jobs={message.jobs} />
+                    <JobsTable 
+                      jobs={message.jobs} 
+                      companyLogo={message.selectedCompany?.logoUrl} 
+                      companyName={message.jobs[0]?.companyName || ""}
+                    />
                   </div>
                 )}
 
                 {/* Render investors table if message has investors */}
                 {!isUser && message.investors && message.investors.length > 0 && (
                   <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
-                    <InvestorsTable investors={message.investors} />
+                    <InvestorsTable 
+                      investors={message.investors} 
+                      companyLogo={message.selectedCompany?.logoUrl}
+                      companyName={message.investors[0]?.companyName || ""}
+                    />
                   </div>
                 )}
               </>

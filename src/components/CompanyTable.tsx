@@ -107,6 +107,36 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
     </th>
   );
 
+  // Company logo mapping based on industry
+  const getCompanyLogoUrl = (company: CompanyData) => {
+    const industry = company.industry?.toLowerCase() || '';
+    
+    if (industry.includes('tech') || industry.includes('technology')) {
+      return "https://placehold.co/200x200/4F46E5/ffffff?text=T";
+    } else if (industry.includes('energy') || industry.includes('renewable')) {
+      return "https://placehold.co/200x200/10B981/ffffff?text=E";
+    } else if (industry.includes('health') || industry.includes('healthcare')) {
+      return "https://placehold.co/200x200/EC4899/ffffff?text=H";
+    } else if (industry.includes('finance') || industry.includes('financial')) {
+      return "https://placehold.co/200x200/F59E0B/ffffff?text=F";
+    } else if (industry.includes('logistics') || industry.includes('transportation')) {
+      return "https://placehold.co/200x200/3B82F6/ffffff?text=L";
+    }
+    
+    // Default logo
+    return "https://placehold.co/200x200/6D28D9/ffffff?text=C";
+  };
+
+  // Get CEO avatar image
+  const getCeoAvatarUrl = (name: string) => {
+    // Generate a unique but consistent image for each CEO name
+    const initial = name.charAt(0).toUpperCase();
+    const nameHash = name.length % 6; // Simple hash for variety
+    const colors = ["4F46E5", "10B981", "EC4899", "F59E0B", "3B82F6", "6D28D9"];
+    
+    return `https://placehold.co/200x200/${colors[nameHash]}/ffffff?text=${initial}`;
+  };
+
   return (
     <div className="w-full mt-2 mb-4">
       <div className="flex justify-between items-center mb-3">
@@ -147,6 +177,9 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
                   .sort((a, b) => (b.leadScores?.rank || 0) - (a.leadScores?.rank || 0))
                   .findIndex(c => c.id === company.id) + 1;
                 
+                // Get company logo and add to company object
+                company.logoUrl = company.logoUrl || getCompanyLogoUrl(company);
+                
                 return (
                   <tr 
                     key={company.id} 
@@ -161,15 +194,23 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
                       </div>
                     </td>
                     <td className="px-4 py-3 flex items-center gap-2">
-                      <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
-                        <Building className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      <div className="w-8 h-8 rounded-md shadow overflow-hidden flex-shrink-0 bg-indigo-50">
+                        <img 
+                          src={company.logoUrl} 
+                          alt={company.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <span className="font-medium">{company.name}</span>
                     </td>
                     <td className="px-4 py-3">{company.position || "-"}</td>
                     <td className="px-4 py-3 flex items-center gap-2">
-                      <div className="p-1.5 bg-purple-100 dark:bg-purple-900/50 rounded-md">
-                        <User className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      <div className="w-8 h-8 rounded-full shadow overflow-hidden flex-shrink-0">
+                        <img 
+                          src={getCeoAvatarUrl(company.ceo)} 
+                          alt={company.ceo}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       {company.ceo}
                     </td>
