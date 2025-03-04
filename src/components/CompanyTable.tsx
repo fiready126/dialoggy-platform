@@ -15,7 +15,7 @@ interface CompanyTableProps {
 export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: CompanyTableProps) => {
   const [selectedCompany, setSelectedCompany] = useState<CompanyData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [sortField, setSortField] = useState<keyof CompanyData | null>(null);
+  const [sortField, setSortField] = useState<keyof CompanyData | null | 'rank'>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const handleRowClick = (company: CompanyData) => {
@@ -44,7 +44,7 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
     }
   };
 
-  const handleSort = (field: keyof CompanyData) => {
+  const handleSort = (field: keyof CompanyData | 'rank') => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -55,6 +55,14 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
 
   const sortedCompanies = [...companies].sort((a, b) => {
     if (!sortField) return 0;
+    
+    if (sortField === 'rank') {
+      const rankA = a.leadScores?.rank || 0;
+      const rankB = b.leadScores?.rank || 0;
+      return sortDirection === 'asc' 
+        ? rankA - rankB 
+        : rankB - rankA;
+    }
     
     let fieldA: any = sortField === 'leadScores' ? a.leadScores?.rank : a[sortField];
     let fieldB: any = sortField === 'leadScores' ? b.leadScores?.rank : b[sortField];
@@ -73,7 +81,7 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
       : (fieldA < fieldB ? 1 : -1);
   });
   
-  const SortIcon = ({ field }: { field: keyof CompanyData }) => (
+  const SortIcon = ({ field }: { field: keyof CompanyData | 'rank' }) => (
     <span className="ml-1 inline-flex">
       {sortField === field ? (
         sortDirection === 'asc' ? (
@@ -87,7 +95,7 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
     </span>
   );
 
-  const renderSortableHeader = (field: keyof CompanyData, label: string) => (
+  const renderSortableHeader = (field: keyof CompanyData | 'rank', label: string) => (
     <th 
       className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
       onClick={() => handleSort(field)}
@@ -122,7 +130,7 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-b">
-                <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Rank</th>
+                {renderSortableHeader('rank', 'Rank')}
                 {renderSortableHeader('name', 'Name')}
                 {renderSortableHeader('position', 'Position')}
                 {renderSortableHeader('ceo', 'CEO')}
