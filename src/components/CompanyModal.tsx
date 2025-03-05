@@ -60,6 +60,19 @@ export const CompanyModal = ({
     setCeoEmailModalOpen(true);
   };
 
+  const handleSuggestionSelect = (suggestion: string) => {
+    setEmailMessage(suggestion);
+  };
+
+  const emailSuggestionTriggers = {
+    "hello": `Hello ${company.ceo.split(' ')[0]}, I came across ${company.name} and wanted to connect.`,
+    "intro": `I'm reaching out regarding ${company.name}'s innovative work in the ${company.industry} sector.`,
+    "meeting": `Would you be available for a 15-minute call next week to discuss how ${company.name} and our company could collaborate?`,
+    "follow": `I'm following up on our previous conversation about ${company.name}'s products.`,
+    "partner": `I'd like to explore potential partnership opportunities between our organizations in the ${company.industry} market.`,
+    "interest": `I'm particularly interested in your approach to ${company.industry} and would love to learn more.`,
+  };
+
   const handleSendEmail = async () => {
     if (!emailMessage.trim()) {
       toast({
@@ -183,7 +196,6 @@ export const CompanyModal = ({
                 </div>
               </div>
 
-              {/* New buttons for Jobs and Investors */}
               <div className="flex space-x-2 pt-2">
                 <Button 
                   variant="outline" 
@@ -309,7 +321,6 @@ export const CompanyModal = ({
         </DialogContent>
       </Dialog>
 
-      {/* CEO Email Modal */}
       <Dialog open={ceoEmailModalOpen} onOpenChange={(open) => setCeoEmailModalOpen(open)}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -359,7 +370,12 @@ export const CompanyModal = ({
                 onChange={(e) => setEmailMessage(e.target.value)}
                 placeholder={`Write a message to ${company.ceo.split(' ')[0]}...`}
                 className="min-h-[120px]"
+                suggestionTriggers={emailSuggestionTriggers}
+                onSuggestionSelect={handleSuggestionSelect}
               />
+              <div className="text-xs text-muted-foreground mt-1">
+                Type "hello", "intro", "meeting", "partner" or other keywords for template suggestions
+              </div>
             </div>
           </div>
 
