@@ -88,8 +88,11 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           {...props}
         />
         {suggestion && (
-          <div className="absolute left-0 right-0 bottom-0 px-3 py-2 text-sm text-muted-foreground opacity-50 pointer-events-none">
-            {props.value?.toString() + suggestion.substring((props.value?.toString() || "").length)}
+          <div className="absolute top-0 px-3 py-2 text-sm pointer-events-none w-full">
+            <span className="invisible">{props.value}</span>
+            <span className="text-muted-foreground opacity-50">
+              {suggestion.substring((props.value?.toString() || "").length)}
+            </span>
           </div>
         )}
         {suggestion && (
