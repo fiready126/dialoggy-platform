@@ -1,10 +1,13 @@
-
 import React, { useState } from "react";
 import { InboxLayout } from "./InboxLayout";
 import { MessageThread } from "./MessageThread";
 import { EmptyState } from "./EmptyState";
 import { Contact, Thread, Message } from "@/types/inbox";
 import { useToast } from "@/components/ui/use-toast";
+import { JobsTable } from "@/components/JobsTable";
+import { InvestorsTable } from "@/components/InvestorsTable";
+import { JobData } from "@/types/chat";
+import { InvestorData } from "@/types/chat";
 
 // Sample data for email contacts
 const EMAIL_CONTACTS: Contact[] = [
@@ -99,6 +102,94 @@ const EMAIL_THREADS: Thread[] = [
     ],
   },
 ];
+
+// Sample job data for contacts
+const CONTACT_JOBS: Record<string, JobData[]> = {
+  "e1": [
+    {
+      id: "j1",
+      title: "Senior Software Engineer",
+      companyName: "TechVision Inc.",
+      type: "Full-time",
+      location: "San Francisco, CA",
+      salary: "$150,000 - $180,000"
+    },
+    {
+      id: "j2",
+      title: "Product Manager",
+      companyName: "TechVision Inc.",
+      type: "Full-time",
+      location: "San Francisco, CA",
+      salary: "$130,000 - $160,000"
+    }
+  ],
+  "e2": [
+    {
+      id: "j3",
+      title: "Energy Solutions Architect",
+      companyName: "Green Energy Solutions",
+      type: "Full-time",
+      location: "Austin, TX",
+      salary: "$120,000 - $150,000"
+    }
+  ],
+  "e3": [
+    {
+      id: "j4",
+      title: "Healthcare Data Analyst",
+      companyName: "HealthPlus",
+      type: "Full-time",
+      location: "Boston, MA",
+      salary: "$110,000 - $130,000"
+    },
+    {
+      id: "j5",
+      title: "Medical Research Associate",
+      companyName: "HealthPlus",
+      type: "Contract",
+      location: "Remote",
+      salary: "$90,000 - $110,000"
+    }
+  ]
+};
+
+// Sample investor data for contacts
+const CONTACT_INVESTORS: Record<string, InvestorData[]> = {
+  "e1": [
+    {
+      id: "i1",
+      name: "Sequoia Capital",
+      companyName: "TechVision Inc.",
+      country: "USA",
+      funding: "$25M Series A"
+    },
+    {
+      id: "i2",
+      name: "Andreessen Horowitz",
+      companyName: "TechVision Inc.",
+      country: "USA",
+      funding: "$15M Seed"
+    }
+  ],
+  "e2": [
+    {
+      id: "i3",
+      name: "Climate Fund",
+      companyName: "Green Energy Solutions",
+      country: "Germany",
+      funding: "$18M Series B"
+    }
+  ],
+  "e4": [
+    {
+      id: "i4",
+      name: "Global Finance Partners",
+      companyName: "Global Finance Group",
+      country: "UK",
+      funding: "$30M Series C"
+    }
+  ]
+};
 
 export const EmailInbox: React.FC = () => {
   const [contacts] = useState<Contact[]>(EMAIL_CONTACTS);
@@ -200,6 +291,9 @@ export const EmailInbox: React.FC = () => {
 
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
+  
+  const contactJobs = selectedContactId ? CONTACT_JOBS[selectedContactId] || [] : [];
+  const contactInvestors = selectedContactId ? CONTACT_INVESTORS[selectedContactId] || [] : [];
 
   return (
     <InboxLayout
@@ -211,6 +305,18 @@ export const EmailInbox: React.FC = () => {
       onSelectContact={handleSelectContact}
       onSelectThread={handleSelectThread}
       onNewMessage={handleNewMessage}
+      jobsContent={selectedContact && (
+        <JobsTable 
+          jobs={contactJobs} 
+          companyName={selectedContact.company || selectedContact.name}
+        />
+      )}
+      investorsContent={selectedContact && (
+        <InvestorsTable 
+          investors={contactInvestors} 
+          companyName={selectedContact.company || selectedContact.name}
+        />
+      )}
     >
       {selectedThread && selectedContact ? (
         <MessageThread 

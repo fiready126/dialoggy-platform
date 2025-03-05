@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { InboxLayout } from "./InboxLayout";
 import { MessageThread } from "./MessageThread";
@@ -9,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { UserPlus, UserCheck, Send, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { JobsTable } from "@/components/JobsTable";
+import { InvestorsTable } from "@/components/InvestorsTable";
+import { JobData } from "@/types/chat";
+import { InvestorData } from "@/types/chat";
 
 // Sample data for Twitter contacts
 const TWITTER_CONTACTS: Contact[] = [
@@ -105,6 +108,77 @@ const TWITTER_THREADS: Thread[] = [
     ],
   },
 ];
+
+// Sample job data for contacts
+const CONTACT_JOBS: Record<string, JobData[]> = {
+  "t1": [
+    {
+      id: "tj1",
+      title: "Social Media Manager",
+      companyName: "TechVision Inc.",
+      type: "Full-time",
+      location: "San Francisco, CA",
+      salary: "$90,000 - $110,000"
+    }
+  ],
+  "t2": [
+    {
+      id: "tj2",
+      title: "Community Manager",
+      companyName: "Green Energy Solutions",
+      type: "Part-time",
+      location: "Remote",
+      salary: "$60,000 - $75,000"
+    }
+  ],
+  "t4": [
+    {
+      id: "tj3",
+      title: "Financial Analyst",
+      companyName: "Global Finance Group",
+      type: "Full-time",
+      location: "New York, NY",
+      salary: "$120,000 - $140,000"
+    },
+    {
+      id: "tj4",
+      title: "Investment Associate",
+      companyName: "Global Finance Group",
+      type: "Full-time",
+      location: "London, UK",
+      salary: "£80,000 - £100,000"
+    }
+  ]
+};
+
+// Sample investor data for contacts
+const CONTACT_INVESTORS: Record<string, InvestorData[]> = {
+  "t1": [
+    {
+      id: "ti1",
+      name: "Digital Ventures",
+      companyName: "TechVision Inc.",
+      country: "USA",
+      funding: "$10M Seed"
+    }
+  ],
+  "t4": [
+    {
+      id: "ti2",
+      name: "Global Capital",
+      companyName: "Global Finance Group",
+      country: "UK",
+      funding: "$50M Series D"
+    },
+    {
+      id: "ti3",
+      name: "European Investment Fund",
+      companyName: "Global Finance Group",
+      country: "EU",
+      funding: "€30M Growth"
+    }
+  ]
+};
 
 export const TwitterInbox: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>(TWITTER_CONTACTS);
@@ -225,6 +299,9 @@ export const TwitterInbox: React.FC = () => {
 
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
+  
+  const contactJobs = selectedContactId ? CONTACT_JOBS[selectedContactId] || [] : [];
+  const contactInvestors = selectedContactId ? CONTACT_INVESTORS[selectedContactId] || [] : [];
 
   return (
     <InboxLayout
@@ -236,6 +313,18 @@ export const TwitterInbox: React.FC = () => {
       onSelectContact={handleSelectContact}
       onSelectThread={handleSelectThread}
       onNewMessage={handleNewMessage}
+      jobsContent={selectedContact && (
+        <JobsTable 
+          jobs={contactJobs} 
+          companyName={selectedContact.company || selectedContact.name}
+        />
+      )}
+      investorsContent={selectedContact && (
+        <InvestorsTable 
+          investors={contactInvestors} 
+          companyName={selectedContact.company || selectedContact.name}
+        />
+      )}
     >
       {selectedThread && selectedContact ? (
         <>

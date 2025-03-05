@@ -7,6 +7,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { UserPlus, UserCheck, Send } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { JobsTable } from "@/components/JobsTable";
+import { InvestorsTable } from "@/components/InvestorsTable";
+import { JobData } from "@/types/chat";
+import { InvestorData } from "@/types/chat";
 
 // Sample data for LinkedIn contacts
 const LINKEDIN_CONTACTS: Contact[] = [
@@ -103,6 +107,75 @@ const LINKEDIN_THREADS: Thread[] = [
     ],
   },
 ];
+
+// Sample job data for contacts
+const CONTACT_JOBS: Record<string, JobData[]> = {
+  "l1": [
+    {
+      id: "lj1",
+      title: "Chief Technology Officer",
+      companyName: "TechVision Inc.",
+      type: "Full-time",
+      location: "San Francisco, CA",
+      salary: "$200,000 - $250,000"
+    },
+    {
+      id: "lj2",
+      title: "VP of Engineering",
+      companyName: "TechVision Inc.",
+      type: "Full-time",
+      location: "San Francisco, CA",
+      salary: "$180,000 - $220,000"
+    }
+  ],
+  "l2": [
+    {
+      id: "lj3",
+      title: "Renewable Energy Specialist",
+      companyName: "Green Energy Solutions",
+      type: "Full-time",
+      location: "Austin, TX",
+      salary: "$130,000 - $160,000"
+    },
+    {
+      id: "lj4",
+      title: "Sustainability Consultant",
+      companyName: "Green Energy Solutions",
+      type: "Contract",
+      location: "Remote",
+      salary: "$100,000 - $120,000"
+    }
+  ]
+};
+
+// Sample investor data for contacts
+const CONTACT_INVESTORS: Record<string, InvestorData[]> = {
+  "l1": [
+    {
+      id: "li1",
+      name: "Accel Partners",
+      companyName: "TechVision Inc.",
+      country: "USA",
+      funding: "$30M Series B"
+    },
+    {
+      id: "li2",
+      name: "Kleiner Perkins",
+      companyName: "TechVision Inc.",
+      country: "USA",
+      funding: "$20M Series A"
+    }
+  ],
+  "l3": [
+    {
+      id: "li3",
+      name: "Healthcare Ventures",
+      companyName: "HealthPlus",
+      country: "USA",
+      funding: "$15M Series A"
+    }
+  ]
+};
 
 export const LinkedinInbox: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>(LINKEDIN_CONTACTS);
@@ -223,6 +296,9 @@ export const LinkedinInbox: React.FC = () => {
 
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
+  
+  const contactJobs = selectedContactId ? CONTACT_JOBS[selectedContactId] || [] : [];
+  const contactInvestors = selectedContactId ? CONTACT_INVESTORS[selectedContactId] || [] : [];
 
   return (
     <InboxLayout
@@ -234,6 +310,18 @@ export const LinkedinInbox: React.FC = () => {
       onSelectContact={handleSelectContact}
       onSelectThread={handleSelectThread}
       onNewMessage={handleNewMessage}
+      jobsContent={selectedContact && (
+        <JobsTable 
+          jobs={contactJobs} 
+          companyName={selectedContact.company || selectedContact.name}
+        />
+      )}
+      investorsContent={selectedContact && (
+        <InvestorsTable 
+          investors={contactInvestors} 
+          companyName={selectedContact.company || selectedContact.name}
+        />
+      )}
     >
       {selectedThread && selectedContact ? (
         <>
