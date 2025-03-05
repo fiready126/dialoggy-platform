@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CompanyData } from "@/types/chat";
 import { useToast } from "@/components/ui/use-toast";
+import { LeadScorePolygon } from "@/components/LeadScorePolygon";
 import {
   Building,
   User,
@@ -26,7 +28,8 @@ import {
   X,
   Check,
   Briefcase,
-  DollarSign
+  DollarSign,
+  Wand2
 } from "lucide-react";
 
 interface CompanyModalProps {
@@ -48,6 +51,7 @@ export const CompanyModal = ({
   const [emailSubject, setEmailSubject] = useState(`Regarding ${company.name}`);
   const [emailMessage, setEmailMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const { toast } = useToast();
 
   const scoreColor = (score: number) => {
@@ -62,6 +66,42 @@ export const CompanyModal = ({
 
   const handleSuggestionSelect = (suggestion: string) => {
     setEmailMessage(suggestion);
+  };
+
+  const handleGenerateAI = async () => {
+    setIsGeneratingAI(true);
+    
+    try {
+      // Simulate AI generation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Generate a more specific, personalized message based on company info
+      const generatedMessage = 
+        `Hello ${company.ceo.split(' ')[0]}, 
+
+I recently learned about ${company.name}'s impressive achievements in the ${company.industry} sector. Your approach to innovation and growth has caught my attention, and I believe there could be potential synergies between our organizations.
+
+Would you be open to a brief conversation next week to explore how we might collaborate? I'd love to learn more about your current priorities and share how our expertise could support your goals.
+
+Looking forward to your response,
+[Your Name]`;
+      
+      setEmailMessage(generatedMessage);
+      
+      toast({
+        title: "AI message generated",
+        description: "The message has been generated and inserted into the editor.",
+        variant: "default",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to generate message",
+        description: "There was an error generating the AI message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingAI(false);
+    }
   };
 
   const emailSuggestionTriggers = {
@@ -218,71 +258,22 @@ export const CompanyModal = ({
               </div>
             </div>
 
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                Lead Scores
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Engagement Score</span>
-                    </div>
-                    <span className={`${scoreColor(company.leadScores.engagement)} font-medium`}>
-                      {company.leadScores.engagement}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div
-                      className={company.leadScores.engagement >= 80 ? "bg-green-500 h-2 rounded-full" : 
-                                company.leadScores.engagement >= 60 ? "bg-yellow-500 h-2 rounded-full" : 
-                                "bg-red-500 h-2 rounded-full"}
-                      style={{ width: `${company.leadScores.engagement}%` }}
-                    ></div>
-                  </div>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  Lead Score Metrics
+                </h3>
+                <LeadScorePolygon scores={{
+                  engagement: company.leadScores.engagement,
+                  firmographicFit: company.leadScores.firmographicFit,
+                  conversion: company.leadScores.conversion
+                }} />
+              </div>
 
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      <Building className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Firmographic Fit</span>
-                    </div>
-                    <span className={`${scoreColor(company.leadScores.firmographicFit)} font-medium`}>
-                      {company.leadScores.firmographicFit}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div
-                      className={company.leadScores.firmographicFit >= 80 ? "bg-green-500 h-2 rounded-full" : 
-                                company.leadScores.firmographicFit >= 60 ? "bg-yellow-500 h-2 rounded-full" : 
-                                "bg-red-500 h-2 rounded-full"}
-                      style={{ width: `${company.leadScores.firmographicFit}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      <Percent className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Conversion Score</span>
-                    </div>
-                    <span className={`${scoreColor(company.leadScores.conversion)} font-medium`}>
-                      {company.leadScores.conversion}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div
-                      className={company.leadScores.conversion >= 80 ? "bg-green-500 h-2 rounded-full" : 
-                                company.leadScores.conversion >= 60 ? "bg-yellow-500 h-2 rounded-full" : 
-                                "bg-red-500 h-2 rounded-full"}
-                      style={{ width: `${company.leadScores.conversion}%` }}
-                    ></div>
-                  </div>
-                </div>
-
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  Rank Score
+                </h3>
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <div className="flex items-center gap-2">
@@ -361,8 +352,28 @@ export const CompanyModal = ({
             </div>
             
             <div className="space-y-2">
-              <label htmlFor="message" className="text-sm font-medium">
-                Message
+              <label htmlFor="message" className="text-sm font-medium flex items-center justify-between">
+                <span>Message</span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  onClick={handleGenerateAI}
+                  disabled={isGeneratingAI}
+                >
+                  {isGeneratingAI ? (
+                    <>
+                      <div className="animate-spin h-3 w-3 mr-1 border-2 border-b-transparent border-current rounded-full" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-3 w-3 mr-1" />
+                      Generate AI
+                    </>
+                  )}
+                </Button>
               </label>
               <Textarea
                 id="message"
@@ -372,6 +383,7 @@ export const CompanyModal = ({
                 className="min-h-[120px]"
                 suggestionTriggers={emailSuggestionTriggers}
                 onSuggestionSelect={handleSuggestionSelect}
+                onGenerateAI={handleGenerateAI}
               />
               <div className="text-xs text-muted-foreground mt-1">
                 Type "hello", "intro", "meeting", "partner" or other keywords for template suggestions

@@ -8,10 +8,11 @@ export interface TextareaProps
   maxRows?: number;
   suggestionTriggers?: Record<string, string>;
   onSuggestionSelect?: (suggestion: string) => void;
+  onGenerateAI?: () => void;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, maxRows, suggestionTriggers = {}, onSuggestionSelect, ...props }, ref) => {
+  ({ className, maxRows, suggestionTriggers = {}, onSuggestionSelect, onGenerateAI, ...props }, ref) => {
     const [suggestion, setSuggestion] = useState<string>("");
     const internalRef = useRef<HTMLTextAreaElement>(null);
     const combinedRef = (node: HTMLTextAreaElement) => {
@@ -98,6 +99,23 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {suggestion && (
           <div className="absolute right-3 bottom-2 text-xs text-muted-foreground bg-background px-1">
             Press Tab to complete
+          </div>
+        )}
+        {onGenerateAI && (
+          <div className="absolute right-3 top-2 z-10">
+            <button
+              type="button"
+              onClick={onGenerateAI}
+              className="text-xs flex items-center gap-1 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              <span className="h-3 w-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 2v4l3 3-3 3v4l7-7-7-7z"></path>
+                  <path d="M21 22v-4l-3-3 3-3v-4l-7 7 7 7z"></path>
+                </svg>
+              </span>
+              AI
+            </button>
           </div>
         )}
       </div>
