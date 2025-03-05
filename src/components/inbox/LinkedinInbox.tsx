@@ -1,12 +1,12 @@
-
 import React, { useState } from "react";
 import { InboxLayout } from "./InboxLayout";
 import { MessageThread } from "./MessageThread";
 import { EmptyState } from "./EmptyState";
-import { Contact, Thread } from "@/types/inbox";
+import { Contact, Thread, Message } from "@/types/inbox";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { UserPlus, UserCheck } from "lucide-react";
+import { UserPlus, UserCheck, Send } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 // Sample data for LinkedIn contacts
 const LINKEDIN_CONTACTS: Contact[] = [

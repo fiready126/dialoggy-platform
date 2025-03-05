@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { InboxLayout } from "./InboxLayout";
 import { MessageThread } from "./MessageThread";
 import { EmptyState } from "./EmptyState";
-import { Contact, Thread } from "@/types/inbox";
+import { Contact, Thread, Message } from "@/types/inbox";
 import { useToast } from "@/components/ui/use-toast";
 
 // Sample data for email contacts
