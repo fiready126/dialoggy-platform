@@ -288,13 +288,18 @@ const Index = () => {
       job.companyName.toLowerCase().includes(companyName.toLowerCase())
     );
     
+    const selectedCompany = SAMPLE_COMPANIES.find(company => 
+      company.name.toLowerCase().includes(companyName.toLowerCase())
+    );
+  
     setTimeout(() => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: `Here are the job listings for ${companyName}:`,
         timestamp: new Date().toISOString(),
-        jobs: filteredJobs
+        jobs: filteredJobs,
+        selectedCompany: selectedCompany 
       };
       
       const finalUpdatedSession = {
@@ -343,13 +348,18 @@ const Index = () => {
       investor.companyName.toLowerCase().includes(companyName.toLowerCase())
     );
     
+    const selectedCompany = SAMPLE_COMPANIES.find(company => 
+      company.name.toLowerCase().includes(companyName.toLowerCase())
+    );
+  
     setTimeout(() => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: `Here are the investors for ${companyName}:`,
         timestamp: new Date().toISOString(),
-        investors: filteredInvestors
+        investors: filteredInvestors,
+        selectedCompany: selectedCompany
       };
       
       const finalUpdatedSession = {

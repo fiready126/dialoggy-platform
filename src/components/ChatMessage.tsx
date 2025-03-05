@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { MessageSquare, User, Copy, Check, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,16 +33,12 @@ const ChatMessage = ({
   const isUser = message.role === "user";
 
   useEffect(() => {
-    // Start with the message invisible
     setIsVisible(false);
     
-    // Use requestAnimationFrame to ensure DOM is updated before animation starts
     const animationFrame = requestAnimationFrame(() => {
-      // Force a reflow by accessing offsetHeight
       if (messageRef.current) {
         messageRef.current.offsetHeight;
         
-        // Then set visible to trigger animation
         setIsVisible(true);
       }
     });
@@ -149,7 +144,6 @@ const ChatMessage = ({
                   </Markdown>
                 </div>
                 
-                {/* Render company table if message has companies */}
                 {!isUser && message.companies && message.companies.length > 0 && (
                   <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
                     <CompanyTable 
@@ -160,7 +154,6 @@ const ChatMessage = ({
                   </div>
                 )}
 
-                {/* Render jobs table if message has jobs */}
                 {!isUser && message.jobs && message.jobs.length > 0 && (
                   <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
                     <JobsTable 
@@ -171,7 +164,6 @@ const ChatMessage = ({
                   </div>
                 )}
 
-                {/* Render investors table if message has investors */}
                 {!isUser && message.investors && message.investors.length > 0 && (
                   <div className="mt-4 bg-white dark:bg-slate-950 rounded-lg shadow-md p-2">
                     <InvestorsTable 

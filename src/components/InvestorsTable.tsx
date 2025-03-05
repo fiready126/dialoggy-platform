@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { InvestorData } from "@/types/chat";
@@ -7,9 +6,11 @@ import * as XLSX from 'xlsx';
 
 interface InvestorsTableProps {
   investors: InvestorData[];
+  companyLogo?: string;
+  companyName: string;
 }
 
-export const InvestorsTable = ({ investors }: InvestorsTableProps) => {
+export const InvestorsTable = ({ investors, companyLogo, companyName }: InvestorsTableProps) => {
   const [sortField, setSortField] = useState<keyof InvestorData | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -79,6 +80,15 @@ export const InvestorsTable = ({ investors }: InvestorsTableProps) => {
     <div className="w-full mt-2 mb-4">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold flex items-center">
+          {companyLogo && (
+            <div className="w-6 h-6 rounded-md shadow overflow-hidden flex-shrink-0 mr-2">
+              <img 
+                src={companyLogo} 
+                alt={companyName}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
           <TrendingUp className="h-4 w-4 mr-2 text-green-500" />
           Investors ({investors.length})
         </h3>

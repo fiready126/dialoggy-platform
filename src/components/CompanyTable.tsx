@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CompanyData } from "@/types/chat";
@@ -107,7 +106,6 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
     </th>
   );
 
-  // Company logo mapping based on industry
   const getCompanyLogoUrl = (company: CompanyData) => {
     const industry = company.industry?.toLowerCase() || '';
     
@@ -123,15 +121,12 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
       return "https://placehold.co/200x200/3B82F6/ffffff?text=L";
     }
     
-    // Default logo
     return "https://placehold.co/200x200/6D28D9/ffffff?text=C";
   };
 
-  // Get CEO avatar image
   const getCeoAvatarUrl = (name: string) => {
-    // Generate a unique but consistent image for each CEO name
     const initial = name.charAt(0).toUpperCase();
-    const nameHash = name.length % 6; // Simple hash for variety
+    const nameHash = name.length % 6;
     const colors = ["4F46E5", "10B981", "EC4899", "F59E0B", "3B82F6", "6D28D9"];
     
     return `https://placehold.co/200x200/${colors[nameHash]}/ffffff?text=${initial}`;
@@ -177,8 +172,9 @@ export const CompanyTable = ({ companies, onFindJobs, onFindInvestors }: Company
                   .sort((a, b) => (b.leadScores?.rank || 0) - (a.leadScores?.rank || 0))
                   .findIndex(c => c.id === company.id) + 1;
                 
-                // Get company logo and add to company object
-                company.logoUrl = company.logoUrl || getCompanyLogoUrl(company);
+                if (!company.logoUrl) {
+                  company.logoUrl = getCompanyLogoUrl(company);
+                }
                 
                 return (
                   <tr 

@@ -7,6 +7,7 @@ export interface Message {
   companies?: CompanyData[]; // For company list results
   jobs?: JobData[]; // For job listings
   investors?: InvestorData[]; // For investor listings
+  selectedCompany?: CompanyData; // For the selected company in job or investor listings
 }
 
 export interface ChatSession {
@@ -36,6 +37,7 @@ export interface CompanyData {
   };
   logo?: string;
   description?: string;
+  logoUrl?: string; // Added for company logo URL
 }
 
 export interface JobData {

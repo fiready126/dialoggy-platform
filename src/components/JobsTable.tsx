@@ -7,9 +7,11 @@ import * as XLSX from 'xlsx';
 
 interface JobsTableProps {
   jobs: JobData[];
+  companyLogo?: string; // Added companyLogo prop
+  companyName: string; // Added companyName prop
 }
 
-export const JobsTable = ({ jobs }: JobsTableProps) => {
+export const JobsTable = ({ jobs, companyLogo, companyName }: JobsTableProps) => {
   const downloadAsExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(jobs);
     const workbook = XLSX.utils.book_new();
@@ -21,6 +23,15 @@ export const JobsTable = ({ jobs }: JobsTableProps) => {
     <div className="w-full mt-2 mb-4">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold flex items-center">
+          {companyLogo && (
+            <div className="w-6 h-6 rounded-md shadow overflow-hidden flex-shrink-0 mr-2">
+              <img 
+                src={companyLogo} 
+                alt={companyName}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
           <Briefcase className="h-4 w-4 mr-2 text-blue-500" />
           Job Listings ({jobs.length})
         </h3>
