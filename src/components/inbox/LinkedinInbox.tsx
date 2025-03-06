@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { InboxLayout } from "./InboxLayout";
 import { MessageThread } from "./MessageThread";
@@ -11,6 +12,7 @@ import { JobsTable } from "@/components/JobsTable";
 import { InvestorsTable } from "@/components/InvestorsTable";
 import { JobData } from "@/types/chat";
 import { InvestorData } from "@/types/chat";
+import { CompanyData } from "@/types/chat";
 
 // Sample data for LinkedIn contacts
 const LINKEDIN_CONTACTS: Contact[] = [
@@ -22,16 +24,6 @@ const LINKEDIN_CONTACTS: Contact[] = [
     position: "CEO",
     isFollowing: true,
     lastContactDate: "2023-05-12",
-    platform: "linkedin",
-  },
-  {
-    id: "l2",
-    name: "Michael Chen",
-    handle: "michaelchen",
-    company: "Green Energy Solutions",
-    position: "Founder",
-    isFollowing: false,
-    lastContactDate: "2023-05-08",
     platform: "linkedin",
   },
   {
@@ -294,6 +286,39 @@ export const LinkedinInbox: React.FC = () => {
     }
   };
 
+  const handleAddContact = (company: CompanyData) => {
+    // Check if CEO already exists in contacts
+    const existingContact = contacts.find(
+      contact => contact.name.toLowerCase() === company.ceo.toLowerCase()
+    );
+
+    if (existingContact) {
+      toast({
+        description: `${company.ceo} is already in your contacts`,
+        variant: "default",
+      });
+      return;
+    }
+
+    // Create new contact from company CEO
+    const newContact: Contact = {
+      id: `l${Date.now()}`,
+      name: company.ceo,
+      handle: company.ceo.toLowerCase().replace(/\s+/g, ''),
+      company: company.name,
+      position: "CEO",
+      isFollowing: false,
+      lastContactDate: new Date().toISOString().split('T')[0],
+      platform: "linkedin",
+    };
+
+    setContacts(prev => [newContact, ...prev]);
+    
+    toast({
+      description: `${company.ceo} has been added to your LinkedIn contacts`,
+    });
+  };
+
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
   
@@ -310,6 +335,7 @@ export const LinkedinInbox: React.FC = () => {
       onSelectContact={handleSelectContact}
       onSelectThread={handleSelectThread}
       onNewMessage={handleNewMessage}
+      onAddContact={(company) => handleAddContact(company)}
       jobsContent={selectedContact && (
         <JobsTable 
           jobs={contactJobs} 

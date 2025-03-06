@@ -1,14 +1,38 @@
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState } from "react";
+import { Avatar } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Search, Plus, Building, Users } from "lucide-react";
+import { Input } from "../ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Contact, Thread } from "@/types/inbox";
-import { Search, Plus, MoreVertical, Briefcase, TrendingUp, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "../ui/scroll-area";
+import { CompanyModal } from "@/components/CompanyModal";
+import { CompanyData } from "@/types/chat";
+
+// Sample company data
+const SAMPLE_COMPANY: CompanyData = {
+  id: "c1",
+  name: "TechVision Inc.",
+  industry: "Technology",
+  location: "San Francisco, CA",
+  website: "https://techvision.example.com",
+  ceo: "Sarah Johnson",
+  workEmail: "sarah.johnson@techvision.example.com",
+  salesEmail: "sales@techvision.example.com",
+  description: "A leading technology company focused on AI and machine learning solutions for enterprise customers.",
+  leadScores: {
+    engagement: 85,
+    firmographicFit: 90,
+    conversion: 78,
+    rank: 84
+  }
+};
 
 interface InboxLayoutProps {
   title: string;
+  children: ReactNode;
   contacts: Contact[];
   threads: Thread[];
   selectedContactId: string | null;
@@ -16,14 +40,14 @@ interface InboxLayoutProps {
   onSelectContact: (contactId: string) => void;
   onSelectThread: (threadId: string) => void;
   onNewMessage: () => void;
-  children: React.ReactNode;
-  platformTabs?: ReactNode;
+  onAddContact?: (company: CompanyData) => void;
   jobsContent?: ReactNode;
   investorsContent?: ReactNode;
 }
 
 export const InboxLayout: React.FC<InboxLayoutProps> = ({
   title,
+  children,
   contacts,
   threads,
   selectedContactId,
@@ -31,156 +55,211 @@ export const InboxLayout: React.FC<InboxLayoutProps> = ({
   onSelectContact,
   onSelectThread,
   onNewMessage,
-  children,
-  platformTabs,
+  onAddContact,
   jobsContent,
   investorsContent,
 }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sidebarTab, setSidebarTab] = useState<"contacts" | "companies">("contacts");
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyData | null>(null);
+
+  const filteredContacts = contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleOpenCompanyModal = (company: CompanyData) => {
+    setSelectedCompany(company);
+    setIsCompanyModalOpen(true);
+  };
+
+  const handleCloseCompanyModal = () => {
+    setIsCompanyModalOpen(false);
+    setSelectedCompany(null);
+  };
+
+  const handleAddContact = (platform: 'email' | 'linkedin' | 'twitter') => {
+    if (selectedCompany && onAddContact) {
+      onAddContact(selectedCompany);
+      setIsCompanyModalOpen(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col space-y-4">
-      {platformTabs}
-      
-      <div className="grid grid-cols-12 gap-4 h-[calc(100vh-220px)] min-h-[500px]">
-        {/* Left Sidebar - Contacts */}
-        <div className="col-span-3 border rounded-lg bg-white dark:bg-gray-900 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 border-b flex justify-between items-center">
-            <h3 className="font-medium text-sm">Contacts</h3>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <div className="p-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search contacts..." className="pl-8" />
-            </div>
-          </div>
-          
-          <div className="overflow-y-auto flex-1">
-            {contacts.map(contact => (
-              <div
-                key={contact.id}
-                className={`p-3 cursor-pointer flex items-center gap-3 hover:bg-muted ${
-                  selectedContactId === contact.id ? "bg-muted" : ""
-                }`}
-                onClick={() => onSelectContact(contact.id)}
-              >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                  {contact.avatar ? (
-                    <img src={contact.avatar} alt={contact.name} className="h-10 w-10 rounded-full object-cover" />
-                  ) : (
-                    contact.name.charAt(0)
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{contact.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {contact.company || (contact.handle ? `@${contact.handle}` : contact.email)}
-                  </p>
-                </div>
-              </div>
-            ))}
+    <div className="flex h-full">
+      {/* Sidebar */}
+      <div className="w-80 border-r bg-white dark:bg-gray-800 flex flex-col overflow-hidden">
+        <div className="p-4 border-b">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <div className="relative mt-2">
+            <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search contacts..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
-        
-        {/* Middle - Content Tabs */}
-        <div className="col-span-9 border rounded-lg bg-white dark:bg-gray-900 shadow-sm overflow-hidden flex flex-col">
-          {selectedContactId ? (
-            <Tabs defaultValue="messages" className="w-full h-full flex flex-col">
-              <div className="border-b px-4">
-                <TabsList className="h-12">
-                  <TabsTrigger value="messages" className="flex items-center gap-1">
-                    <MessageCircle className="h-4 w-4" />
-                    Messages
-                  </TabsTrigger>
-                  <TabsTrigger value="jobs" className="flex items-center gap-1">
-                    <Briefcase className="h-4 w-4" />
-                    Jobs
-                  </TabsTrigger>
-                  <TabsTrigger value="investors" className="flex items-center gap-1">
-                    <TrendingUp className="h-4 w-4" />
-                    Investors
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              
-              <TabsContent value="messages" className="flex flex-col flex-1 overflow-hidden m-0 p-0 border-none">
-                <div className="p-4 border-b flex justify-between items-center">
-                  <h3 className="font-medium text-sm">Messages</h3>
-                  <Button onClick={onNewMessage} variant="ghost" size="sm" className="h-8">
-                    <Plus className="h-4 w-4 mr-1" /> New
-                  </Button>
-                </div>
-                
-                <div className="overflow-y-auto flex-1">
-                  {threads.length > 0 ? (
-                    threads.map(thread => {
-                      const contact = contacts.find(c => c.id === thread.contactId);
-                      return (
-                        <div
-                          key={thread.id}
-                          className={`p-3 cursor-pointer border-b hover:bg-muted ${
-                            selectedThreadId === thread.id ? "bg-muted" : ""
-                          } ${!thread.isRead ? "border-l-4 border-l-primary" : ""}`}
-                          onClick={() => onSelectThread(thread.id)}
-                        >
-                          <div className="flex justify-between items-start">
-                            <p className="font-medium text-sm">{contact?.name || "Unknown"}</p>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(thread.lastMessageTimestamp).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
+
+        <Tabs defaultValue="contacts" className="flex-1 flex flex-col">
+          <TabsList className="grid grid-cols-2 px-4 pt-2">
+            <TabsTrigger 
+              value="contacts" 
+              onClick={() => setSidebarTab("contacts")}
+              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Contacts
+            </TabsTrigger>
+            <TabsTrigger 
+              value="companies" 
+              onClick={() => setSidebarTab("companies")}
+              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+            >
+              <Building className="h-4 w-4 mr-2" />
+              Companies
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="contacts" className="flex-1 overflow-hidden mt-0 p-0">
+            <ScrollArea className="flex-1 h-full">
+              <div className="space-y-1 p-2">
+                {filteredContacts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>No contacts found</p>
+                    <p className="text-sm mt-1">Try adjusting your search</p>
+                  </div>
+                ) : (
+                  filteredContacts.map((contact) => (
+                    <div
+                      key={contact.id}
+                      className={`p-2 rounded-lg cursor-pointer transition-colors ${
+                        selectedContactId === contact.id
+                          ? "bg-primary/10"
+                          : "hover:bg-muted"
+                      }`}
+                      onClick={() => onSelectContact(contact.id)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                            {contact.avatar ? (
+                              <img
+                                src={contact.avatar}
+                                alt={contact.name}
+                                className="h-8 w-8 rounded-full object-cover"
+                              />
+                            ) : (
+                              contact.name.charAt(0)
+                            )}
                           </div>
-                          <p className="text-sm text-muted-foreground truncate mt-1">
-                            {thread.subject || thread.messages[thread.messages.length - 1].content.substring(0, 30) + "..."}
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium truncate">{contact.name}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {contact.company && `${contact.position} at ${contact.company}`}
                           </p>
                         </div>
-                      );
-                    })
-                  ) : (
-                    <div className="p-4 text-center text-muted-foreground text-sm">
-                      No messages to display
+                        {threads.some((t) => t.contactId === contact.id && !t.isRead) && (
+                          <Badge variant="default" className="h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                            !
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="companies" className="flex-1 overflow-hidden mt-0 p-0">
+            <ScrollArea className="flex-1 h-full">
+              <div className="space-y-1 p-2">
+                <div
+                  className="p-2 rounded-lg cursor-pointer transition-colors hover:bg-muted"
+                  onClick={() => handleOpenCompanyModal(SAMPLE_COMPANY)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
+                      <Building className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{SAMPLE_COMPANY.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {SAMPLE_COMPANY.industry}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                
-                {children}
-              </TabsContent>
-              
-              <TabsContent value="jobs" className="flex-1 overflow-y-auto m-0 p-4 border-none">
+                {/* More sample companies could be added here */}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          <div className="p-3 border-t">
+            <Button 
+              onClick={onNewMessage} 
+              className="w-full"
+              disabled={!selectedContactId}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Message
+            </Button>
+          </div>
+        </Tabs>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Messages area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {children}
+        </div>
+
+        {/* Info panel */}
+        {selectedContactId && (
+          <div className="border-t bg-muted/30">
+            <Tabs defaultValue="jobs">
+              <TabsList className="w-full bg-transparent border-b">
+                <TabsTrigger value="jobs" className="flex-1">
+                  Jobs
+                </TabsTrigger>
+                <TabsTrigger value="investors" className="flex-1">
+                  Investors
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="jobs" className="max-h-48 overflow-y-auto p-2">
                 {jobsContent || (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center text-muted-foreground">
-                      <Briefcase className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                      <p>No job listings available for this contact</p>
-                    </div>
+                  <div className="text-center py-4 text-muted-foreground">
+                    <p>No job listings available</p>
                   </div>
                 )}
               </TabsContent>
-              
-              <TabsContent value="investors" className="flex-1 overflow-y-auto m-0 p-4 border-none">
+              <TabsContent value="investors" className="max-h-48 overflow-y-auto p-2">
                 {investorsContent || (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center text-muted-foreground">
-                      <TrendingUp className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                      <p>No investor information available for this contact</p>
-                    </div>
+                  <div className="text-center py-4 text-muted-foreground">
+                    <p>No investor information available</p>
                   </div>
                 )}
               </TabsContent>
             </Tabs>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center text-muted-foreground">
-                <p>Select a contact to view messages, jobs and investors</p>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+
+      {/* Company Modal */}
+      {selectedCompany && (
+        <CompanyModal
+          company={selectedCompany}
+          isOpen={isCompanyModalOpen}
+          onClose={handleCloseCompanyModal}
+          onAddContact={handleAddContact}
+        />
+      )}
     </div>
   );
 };

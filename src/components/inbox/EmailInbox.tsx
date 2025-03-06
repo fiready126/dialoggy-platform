@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { InboxLayout } from "./InboxLayout";
 import { MessageThread } from "./MessageThread";
 import { EmptyState } from "./EmptyState";
@@ -8,6 +8,8 @@ import { JobsTable } from "@/components/JobsTable";
 import { InvestorsTable } from "@/components/InvestorsTable";
 import { JobData } from "@/types/chat";
 import { InvestorData } from "@/types/chat";
+import { CompanyModal } from "@/components/CompanyModal";
+import { CompanyData } from "@/types/chat";
 
 // Sample data for email contacts
 const EMAIL_CONTACTS: Contact[] = [
@@ -36,15 +38,6 @@ const EMAIL_CONTACTS: Contact[] = [
     company: "HealthPlus",
     position: "President",
     lastContactDate: "2023-05-05",
-    platform: "email",
-  },
-  {
-    id: "e4",
-    name: "Robert Kiyosaki",
-    email: "robert.kiyosaki@globalfinance.example.com",
-    company: "Global Finance Group",
-    position: "Managing Director",
-    lastContactDate: "2023-04-28",
     platform: "email",
   },
 ];
@@ -192,7 +185,7 @@ const CONTACT_INVESTORS: Record<string, InvestorData[]> = {
 };
 
 export const EmailInbox: React.FC = () => {
-  const [contacts] = useState<Contact[]>(EMAIL_CONTACTS);
+  const [contacts, setContacts] = useState<Contact[]>(EMAIL_CONTACTS);
   const [threads, setThreads] = useState<Thread[]>(EMAIL_THREADS);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
@@ -289,6 +282,38 @@ export const EmailInbox: React.FC = () => {
     });
   };
 
+  const handleAddContact = (company: CompanyData) => {
+    // Check if CEO already exists in contacts
+    const existingContact = contacts.find(
+      contact => contact.name.toLowerCase() === company.ceo.toLowerCase()
+    );
+
+    if (existingContact) {
+      toast({
+        description: `${company.ceo} is already in your contacts`,
+        variant: "default",
+      });
+      return;
+    }
+
+    // Create new contact from company CEO
+    const newContact: Contact = {
+      id: `e${Date.now()}`,
+      name: company.ceo,
+      email: company.workEmail || `${company.ceo.split(' ')[0].toLowerCase()}@${company.name.toLowerCase().replace(/\s+/g, '')}.com`,
+      company: company.name,
+      position: "CEO",
+      lastContactDate: new Date().toISOString().split('T')[0],
+      platform: "email",
+    };
+
+    setContacts(prev => [newContact, ...prev]);
+    
+    toast({
+      description: `${company.ceo} has been added to your contacts`,
+    });
+  };
+
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
   
@@ -305,6 +330,7 @@ export const EmailInbox: React.FC = () => {
       onSelectContact={handleSelectContact}
       onSelectThread={handleSelectThread}
       onNewMessage={handleNewMessage}
+      onAddContact={(company) => handleAddContact(company)}
       jobsContent={selectedContact && (
         <JobsTable 
           jobs={contactJobs} 

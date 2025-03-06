@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Linkedin, Twitter, ArrowLeft, Home } from "lucide-react";
@@ -16,7 +15,6 @@ export const SocialInbox = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if a specific tab is requested via query params
     const params = new URLSearchParams(location.search);
     const tab = params.get("tab");
     if (tab && ["email", "linkedin", "twitter"].includes(tab)) {

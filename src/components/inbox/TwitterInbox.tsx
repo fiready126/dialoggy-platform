@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { InboxLayout } from "./InboxLayout";
 import { MessageThread } from "./MessageThread";
@@ -5,36 +6,16 @@ import { EmptyState } from "./EmptyState";
 import { Contact, Thread, Message } from "@/types/inbox";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { UserPlus, UserCheck, Send, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { UserPlus, UserCheck, Send } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { JobsTable } from "@/components/JobsTable";
 import { InvestorsTable } from "@/components/InvestorsTable";
 import { JobData } from "@/types/chat";
 import { InvestorData } from "@/types/chat";
+import { CompanyData } from "@/types/chat";
 
 // Sample data for Twitter contacts
 const TWITTER_CONTACTS: Contact[] = [
-  {
-    id: "t1",
-    name: "Sarah Johnson",
-    handle: "sarahjohnson",
-    company: "TechVision Inc.",
-    position: "CEO",
-    isFollowing: true,
-    lastContactDate: "2023-05-10",
-    platform: "twitter",
-  },
-  {
-    id: "t2",
-    name: "Michael Chen",
-    handle: "michaelchen",
-    company: "Green Energy Solutions",
-    position: "Founder",
-    isFollowing: false,
-    lastContactDate: "2023-05-07",
-    platform: "twitter",
-  },
   {
     id: "t3",
     name: "Emily Rodriguez",
@@ -46,13 +27,13 @@ const TWITTER_CONTACTS: Contact[] = [
     platform: "twitter",
   },
   {
-    id: "t4",
-    name: "Robert Kiyosaki",
-    handle: "robertkiyosaki",
-    company: "Global Finance Group",
-    position: "Managing Director",
+    id: "t2",
+    name: "Michael Chen",
+    handle: "michaelchen",
+    company: "Green Energy Solutions",
+    position: "Founder",
     isFollowing: false,
-    lastContactDate: "2023-04-22",
+    lastContactDate: "2023-05-07",
     platform: "twitter",
   },
 ];
@@ -297,6 +278,39 @@ export const TwitterInbox: React.FC = () => {
     }
   };
 
+  const handleAddContact = (company: CompanyData) => {
+    // Check if CEO already exists in contacts
+    const existingContact = contacts.find(
+      contact => contact.name.toLowerCase() === company.ceo.toLowerCase()
+    );
+
+    if (existingContact) {
+      toast({
+        description: `${company.ceo} is already in your contacts`,
+        variant: "default",
+      });
+      return;
+    }
+
+    // Create new contact from company CEO
+    const newContact: Contact = {
+      id: `t${Date.now()}`,
+      name: company.ceo,
+      handle: company.ceo.toLowerCase().replace(/\s+/g, ''),
+      company: company.name,
+      position: "CEO",
+      isFollowing: false,
+      lastContactDate: new Date().toISOString().split('T')[0],
+      platform: "twitter",
+    };
+
+    setContacts(prev => [newContact, ...prev]);
+    
+    toast({
+      description: `${company.ceo} has been added to your Twitter contacts`,
+    });
+  };
+
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
   
@@ -313,6 +327,7 @@ export const TwitterInbox: React.FC = () => {
       onSelectContact={handleSelectContact}
       onSelectThread={handleSelectThread}
       onNewMessage={handleNewMessage}
+      onAddContact={(company) => handleAddContact(company)}
       jobsContent={selectedContact && (
         <JobsTable 
           jobs={contactJobs} 
