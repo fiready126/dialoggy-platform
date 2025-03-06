@@ -29,10 +29,7 @@ import {
   Check,
   Briefcase,
   DollarSign,
-  Wand2,
-  UserPlus,
-  Linkedin,
-  Twitter
+  Wand2
 } from "lucide-react";
 
 interface CompanyModalProps {
@@ -41,7 +38,6 @@ interface CompanyModalProps {
   onClose: () => void;
   onFindJobs?: (companyName: string) => void;
   onFindInvestors?: (companyName: string) => void;
-  onAddContact?: (platform: 'email' | 'linkedin' | 'twitter') => void;
 }
 
 export const CompanyModal = ({
@@ -49,8 +45,7 @@ export const CompanyModal = ({
   isOpen,
   onClose,
   onFindJobs,
-  onFindInvestors,
-  onAddContact
+  onFindInvestors
 }: CompanyModalProps) => {
   const [ceoEmailModalOpen, setCeoEmailModalOpen] = useState(false);
   const [emailSubject, setEmailSubject] = useState(`Regarding ${company.name}`);
@@ -170,15 +165,6 @@ Looking forward to your response,
     }
   };
 
-  const handleAddContact = (platform: 'email' | 'linkedin' | 'twitter') => {
-    if (onAddContact) {
-      onAddContact(platform);
-      toast({
-        description: `${company.ceo} has been added to your ${platform === 'email' ? 'Email' : platform === 'linkedin' ? 'LinkedIn' : 'Twitter'} contacts`,
-      });
-    }
-  };
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -270,43 +256,6 @@ Looking forward to your response,
                   Find Investors
                 </Button>
               </div>
-              
-              {onAddContact && (
-                <div className="pt-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                    Add to Inbox
-                  </h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="flex items-center gap-1 py-1 px-2"
-                      onClick={() => handleAddContact('email')}
-                    >
-                      <Mail className="h-3 w-3 text-blue-500" />
-                      <span className="text-xs">Email</span>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="flex items-center gap-1 py-1 px-2"
-                      onClick={() => handleAddContact('linkedin')}
-                    >
-                      <Linkedin className="h-3 w-3 text-blue-500" />
-                      <span className="text-xs">LinkedIn</span>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="flex items-center gap-1 py-1 px-2"
-                      onClick={() => handleAddContact('twitter')}
-                    >
-                      <Twitter className="h-3 w-3 text-blue-500" />
-                      <span className="text-xs">Twitter</span>
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="space-y-4">
