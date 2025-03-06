@@ -15,7 +15,10 @@ import {
   Building,
   Copy,
   Sparkles,
-  RotateCcw
+  RotateCcw,
+  Mail,
+  Linkedin,
+  Twitter
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ChatMessage from "@/components/ChatMessage";
@@ -28,6 +31,7 @@ import { QuestionHint } from "@/components/QuestionHint";
 import { ChatHistoryModal } from "@/components/ChatHistoryModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import * as XLSX from 'xlsx';
+import { useNavigate } from "react-router-dom";
 
 const DEFAULT_SYSTEM_MESSAGE = "You are a helpful, creative, and concise assistant. When asked about companies or CEOs, provide detailed information in a structured format.";
 
@@ -226,6 +230,7 @@ const Index = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isMobile) {

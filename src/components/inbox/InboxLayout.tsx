@@ -42,7 +42,7 @@ export const InboxLayout: React.FC<InboxLayoutProps> = ({
       
       <div className="grid grid-cols-12 gap-4 h-[calc(100vh-220px)] min-h-[500px]">
         {/* Left Sidebar - Contacts */}
-        <div className="col-span-3 border rounded-lg bg-background overflow-hidden flex flex-col">
+        <div className="col-span-3 border rounded-lg bg-white dark:bg-gray-900 shadow-sm overflow-hidden flex flex-col">
           <div className="p-4 border-b flex justify-between items-center">
             <h3 className="font-medium text-sm">Contacts</h3>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -85,7 +85,7 @@ export const InboxLayout: React.FC<InboxLayoutProps> = ({
         </div>
         
         {/* Middle - Content Tabs */}
-        <div className="col-span-9 border rounded-lg bg-background overflow-hidden flex flex-col">
+        <div className="col-span-9 border rounded-lg bg-white dark:bg-gray-900 shadow-sm overflow-hidden flex flex-col">
           {selectedContactId ? (
             <Tabs defaultValue="messages" className="w-full h-full flex flex-col">
               <div className="border-b px-4">
