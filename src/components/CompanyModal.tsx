@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -169,6 +170,15 @@ Looking forward to your response,
     }
   };
 
+  const handleAddContact = (platform: 'email' | 'linkedin' | 'twitter') => {
+    if (onAddContact) {
+      onAddContact(platform);
+      toast({
+        description: `${company.ceo} has been added to your ${platform === 'email' ? 'Email' : platform === 'linkedin' ? 'LinkedIn' : 'Twitter'} contacts`,
+      });
+    }
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -271,12 +281,7 @@ Looking forward to your response,
                       variant="outline" 
                       size="sm"
                       className="flex items-center gap-1 py-1 px-2"
-                      onClick={() => {
-                        onAddContact('email');
-                        toast({
-                          description: `${company.ceo} has been added to your Email contacts`,
-                        });
-                      }}
+                      onClick={() => handleAddContact('email')}
                     >
                       <Mail className="h-3 w-3 text-blue-500" />
                       <span className="text-xs">Email</span>
@@ -285,12 +290,7 @@ Looking forward to your response,
                       variant="outline" 
                       size="sm"
                       className="flex items-center gap-1 py-1 px-2"
-                      onClick={() => {
-                        onAddContact('linkedin');
-                        toast({
-                          description: `${company.ceo} has been added to your LinkedIn contacts`,
-                        });
-                      }}
+                      onClick={() => handleAddContact('linkedin')}
                     >
                       <Linkedin className="h-3 w-3 text-blue-500" />
                       <span className="text-xs">LinkedIn</span>
@@ -299,12 +299,7 @@ Looking forward to your response,
                       variant="outline" 
                       size="sm"
                       className="flex items-center gap-1 py-1 px-2"
-                      onClick={() => {
-                        onAddContact('twitter');
-                        toast({
-                          description: `${company.ceo} has been added to your Twitter contacts`,
-                        });
-                      }}
+                      onClick={() => handleAddContact('twitter')}
                     >
                       <Twitter className="h-3 w-3 text-blue-500" />
                       <span className="text-xs">Twitter</span>
