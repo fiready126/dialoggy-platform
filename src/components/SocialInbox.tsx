@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Linkedin, Twitter, ArrowLeft } from "lucide-react";
+import { Mail, Linkedin, Twitter, ArrowLeft, Home, ChevronDown } from "lucide-react";
 import { EmailInbox } from "./inbox/EmailInbox";
 import { LinkedinInbox } from "./inbox/LinkedinInbox";
 import { TwitterInbox } from "./inbox/TwitterInbox";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export const SocialInbox = () => {
   const [activeTab, setActiveTab] = useState("email");
@@ -46,14 +47,68 @@ export const SocialInbox = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="hidden md:flex items-center gap-1 rounded-full px-4 text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow"
-            >
-              Back to Dashboard
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1 rounded-full px-4 text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow"
+                >
+                  <Home className="h-4 w-4" />
+                  Navigation
+                  <ChevronDown className="h-3 w-3 opacity-70" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-md rounded-lg">
+                <div className="flex flex-col gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start font-normal"
+                    onClick={() => navigate('/')}
+                  >
+                    <Home className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start font-normal text-blue-600 dark:text-blue-400"
+                    onClick={() => {
+                      setActiveTab("email");
+                      navigate('/inbox?tab=email');
+                    }}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Email Inbox
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start font-normal text-blue-600 dark:text-blue-400"
+                    onClick={() => {
+                      setActiveTab("linkedin");
+                      navigate('/inbox?tab=linkedin');
+                    }}
+                  >
+                    <Linkedin className="mr-2 h-4 w-4" />
+                    LinkedIn Inbox
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start font-normal text-blue-600 dark:text-blue-400"
+                    onClick={() => {
+                      setActiveTab("twitter");
+                      navigate('/inbox?tab=twitter');
+                    }}
+                  >
+                    <Twitter className="mr-2 h-4 w-4" />
+                    Twitter Inbox
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         

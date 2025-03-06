@@ -18,7 +18,9 @@ import {
   RotateCcw,
   Mail,
   Linkedin,
-  Twitter
+  Twitter,
+  Inbox,
+  ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ChatMessage from "@/components/ChatMessage";
@@ -32,6 +34,7 @@ import { ChatHistoryModal } from "@/components/ChatHistoryModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import * as XLSX from 'xlsx';
 import { useNavigate } from "react-router-dom";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const DEFAULT_SYSTEM_MESSAGE = "You are a helpful, creative, and concise assistant. When asked about companies or CEOs, provide detailed information in a structured format.";
 
@@ -702,6 +705,60 @@ const Index = () => {
           </div>
           
           <div className="flex items-center space-x-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1 rounded-full px-4 text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow"
+                >
+                  <Inbox className="h-4 w-4" />
+                  Social Inbox
+                  <ChevronDown className="h-3 w-3 opacity-70" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-md rounded-lg">
+                <div className="flex flex-col gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start font-normal"
+                    onClick={() => navigate('/inbox')}
+                  >
+                    <Inbox className="mr-2 h-4 w-4" />
+                    All Inboxes
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start font-normal"
+                    onClick={() => navigate('/inbox/email')}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Email Inbox
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start font-normal"
+                    onClick={() => navigate('/inbox/linkedin')}
+                  >
+                    <Linkedin className="mr-2 h-4 w-4" />
+                    LinkedIn Inbox
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start font-normal"
+                    onClick={() => navigate('/inbox/twitter')}
+                  >
+                    <Twitter className="mr-2 h-4 w-4" />
+                    Twitter Inbox
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+            
             <Button
               variant="outline"
               size="sm"
