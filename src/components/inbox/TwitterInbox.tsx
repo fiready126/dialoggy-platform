@@ -13,50 +13,6 @@ import { InvestorsTable } from "@/components/InvestorsTable";
 import { JobData } from "@/types/chat";
 import { InvestorData } from "@/types/chat";
 
-// Sample data for Twitter contacts
-const TWITTER_CONTACTS: Contact[] = [
-  {
-    id: "t1",
-    name: "Sarah Johnson",
-    handle: "sarahjohnson",
-    company: "TechVision Inc.",
-    position: "CEO",
-    isFollowing: true,
-    lastContactDate: "2023-05-10",
-    platform: "twitter",
-  },
-  {
-    id: "t2",
-    name: "Michael Chen",
-    handle: "michaelchen",
-    company: "Green Energy Solutions",
-    position: "Founder",
-    isFollowing: false,
-    lastContactDate: "2023-05-07",
-    platform: "twitter",
-  },
-  {
-    id: "t3",
-    name: "Emily Rodriguez",
-    handle: "emilyrodriguez",
-    company: "HealthPlus",
-    position: "President",
-    isFollowing: true,
-    lastContactDate: "2023-05-01",
-    platform: "twitter",
-  },
-  {
-    id: "t4",
-    name: "Robert Kiyosaki",
-    handle: "robertkiyosaki",
-    company: "Global Finance Group",
-    position: "Managing Director",
-    isFollowing: false,
-    lastContactDate: "2023-04-22",
-    platform: "twitter",
-  },
-];
-
 // Sample data for Twitter threads
 const TWITTER_THREADS: Thread[] = [
   {
@@ -180,8 +136,13 @@ const CONTACT_INVESTORS: Record<string, InvestorData[]> = {
   ]
 };
 
-export const TwitterInbox: React.FC = () => {
-  const [contacts, setContacts] = useState<Contact[]>(TWITTER_CONTACTS);
+interface TwitterInboxProps {
+  contacts?: Contact[];
+}
+
+export const TwitterInbox: React.FC<TwitterInboxProps> = ({ contacts: propContacts }) => {
+  // Use provided contacts or fallback to sample data
+  const [contacts, setContacts] = useState<Contact[]>(propContacts || []);
   const [threads, setThreads] = useState<Thread[]>(TWITTER_THREADS);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);

@@ -191,8 +191,13 @@ const CONTACT_INVESTORS: Record<string, InvestorData[]> = {
   ]
 };
 
-export const EmailInbox: React.FC = () => {
-  const [contacts] = useState<Contact[]>(EMAIL_CONTACTS);
+interface EmailInboxProps {
+  contacts?: Contact[];
+}
+
+export const EmailInbox: React.FC<EmailInboxProps> = ({ contacts: propContacts }) => {
+  // Use provided contacts or fallback to sample data
+  const [contacts] = useState<Contact[]>(propContacts || EMAIL_CONTACTS);
   const [threads, setThreads] = useState<Thread[]>(EMAIL_THREADS);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);

@@ -12,50 +12,6 @@ import { InvestorsTable } from "@/components/InvestorsTable";
 import { JobData } from "@/types/chat";
 import { InvestorData } from "@/types/chat";
 
-// Sample data for LinkedIn contacts
-const LINKEDIN_CONTACTS: Contact[] = [
-  {
-    id: "l1",
-    name: "Sarah Johnson",
-    handle: "sarahjohnson",
-    company: "TechVision Inc.",
-    position: "CEO",
-    isFollowing: true,
-    lastContactDate: "2023-05-12",
-    platform: "linkedin",
-  },
-  {
-    id: "l2",
-    name: "Michael Chen",
-    handle: "michaelchen",
-    company: "Green Energy Solutions",
-    position: "Founder",
-    isFollowing: false,
-    lastContactDate: "2023-05-08",
-    platform: "linkedin",
-  },
-  {
-    id: "l3",
-    name: "Emily Rodriguez",
-    handle: "emilyrodriguez",
-    company: "HealthPlus",
-    position: "President",
-    isFollowing: true,
-    lastContactDate: "2023-05-03",
-    platform: "linkedin",
-  },
-  {
-    id: "l4",
-    name: "Robert Kiyosaki",
-    handle: "robertkiyosaki",
-    company: "Global Finance Group",
-    position: "Managing Director",
-    isFollowing: false,
-    lastContactDate: "2023-04-25",
-    platform: "linkedin",
-  },
-];
-
 // Sample data for LinkedIn threads
 const LINKEDIN_THREADS: Thread[] = [
   {
@@ -177,8 +133,12 @@ const CONTACT_INVESTORS: Record<string, InvestorData[]> = {
   ]
 };
 
-export const LinkedinInbox: React.FC = () => {
-  const [contacts, setContacts] = useState<Contact[]>(LINKEDIN_CONTACTS);
+interface LinkedinInboxProps {
+  contacts?: Contact[];
+}
+
+export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propContacts }) => {
+  const [contacts, setContacts] = useState<Contact[]>(propContacts || []);
   const [threads, setThreads] = useState<Thread[]>(LINKEDIN_THREADS);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
