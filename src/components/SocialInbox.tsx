@@ -8,12 +8,82 @@ import { TwitterInbox } from "./inbox/TwitterInbox";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { Contact } from "@/types/inbox";
 
 export const SocialInbox = () => {
   const [activeTab, setActiveTab] = useState("email");
+  const [emailContacts, setEmailContacts] = useState<Contact[]>([]);
+  const [linkedinContacts, setLinkedinContacts] = useState<Contact[]>([]);
+  const [twitterContacts, setTwitterContacts] = useState<Contact[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+
+  // Load contacts from localStorage
+  useEffect(() => {
+    const loadContacts = () => {
+      // Email contacts
+      const storedEmailContacts = localStorage.getItem("emailContacts");
+      if (storedEmailContacts) {
+        setEmailContacts(JSON.parse(storedEmailContacts));
+      }
+      
+      // LinkedIn contacts
+      const storedLinkedinContacts = localStorage.getItem("linkedinContacts");
+      if (storedLinkedinContacts) {
+        setLinkedinContacts(JSON.parse(storedLinkedinContacts));
+      }
+      
+      // Twitter contacts
+      const storedTwitterContacts = localStorage.getItem("twitterContacts");
+      if (storedTwitterContacts) {
+        setTwitterContacts(JSON.parse(storedTwitterContacts));
+      }
+    };
+    
+    loadContacts();
+    
+    // Add event listener for storage changes (in case contacts are added from company modal)
+    window.addEventListener("storage", loadContacts);
+    
+    return () => {
+      window.removeEventListener("storage", loadContacts);
+    };
+  }, []);
+
+  // Check for localStorage changes at regular intervals (as a backup for cross-tab communication)
+  useEffect(() => {
+    const checkForChanges = setInterval(() => {
+      // Email contacts
+      const storedEmailContacts = localStorage.getItem("emailContacts");
+      if (storedEmailContacts) {
+        const parsedContacts = JSON.parse(storedEmailContacts);
+        if (JSON.stringify(parsedContacts) !== JSON.stringify(emailContacts)) {
+          setEmailContacts(parsedContacts);
+        }
+      }
+      
+      // LinkedIn contacts
+      const storedLinkedinContacts = localStorage.getItem("linkedinContacts");
+      if (storedLinkedinContacts) {
+        const parsedContacts = JSON.parse(storedLinkedinContacts);
+        if (JSON.stringify(parsedContacts) !== JSON.stringify(linkedinContacts)) {
+          setLinkedinContacts(parsedContacts);
+        }
+      }
+      
+      // Twitter contacts
+      const storedTwitterContacts = localStorage.getItem("twitterContacts");
+      if (storedTwitterContacts) {
+        const parsedContacts = JSON.parse(storedTwitterContacts);
+        if (JSON.stringify(parsedContacts) !== JSON.stringify(twitterContacts)) {
+          setTwitterContacts(parsedContacts);
+        }
+      }
+    }, 2000); // Check every 2 seconds
+    
+    return () => clearInterval(checkForChanges);
+  }, [emailContacts, linkedinContacts, twitterContacts]);
 
   useEffect(() => {
     // Check if a specific tab is requested via query params
@@ -79,15 +149,15 @@ export const SocialInbox = () => {
           
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
             <TabsContent value="email" className="m-0">
-              <EmailInbox />
+              <EmailInbox contacts={emailContacts} />
             </TabsContent>
             
             <TabsContent value="linkedin" className="m-0">
-              <LinkedinInbox />
+              <LinkedinInbox contacts={linkedinContacts} />
             </TabsContent>
             
             <TabsContent value="twitter" className="m-0">
-              <TwitterInbox />
+              <TwitterInbox contacts={twitterContacts} />
             </TabsContent>
           </div>
         </Tabs>

@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CompanyData } from "@/types/chat";
+import { Contact } from "@/types/inbox";
 import { useToast } from "@/components/ui/use-toast";
 import { LeadScorePolygon } from "@/components/LeadScorePolygon";
 import {
@@ -29,7 +30,10 @@ import {
   Check,
   Briefcase,
   DollarSign,
-  Wand2
+  Wand2,
+  Linkedin,
+  Twitter,
+  PlusCircle
 } from "lucide-react";
 
 interface CompanyModalProps {
@@ -52,6 +56,15 @@ export const CompanyModal = ({
   const [emailMessage, setEmailMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [addingContact, setAddingContact] = useState<{
+    email: boolean;
+    linkedin: boolean;
+    twitter: boolean;
+  }>({
+    email: false,
+    linkedin: false,
+    twitter: false
+  });
   const { toast } = useToast();
 
   const scoreColor = (score: number) => {
@@ -165,6 +178,55 @@ Looking forward to your response,
     }
   };
 
+  const handleAddContact = (platform: 'email' | 'linkedin' | 'twitter') => {
+    setAddingContact(prev => ({ ...prev, [platform]: true }));
+    
+    // Create a new contact object
+    const newContact: Contact = {
+      id: `${platform}-${Date.now()}`,
+      name: company.ceo,
+      platform: platform,
+      company: company.name,
+      position: "CEO",
+      ...(platform === 'email' && { email: company.workEmail || `${company.ceo.split(' ')[0].toLowerCase()}@${company.website.replace(/(^\w+:|^)\/\//, "").split('/')[0]}` }),
+      ...(platform === 'linkedin' && { handle: company.ceo.split(' ')[0].toLowerCase() }),
+      ...(platform === 'twitter' && { handle: company.ceo.split(' ')[0].toLowerCase() }),
+    };
+    
+    // Get existing contacts from localStorage
+    const existingContactsString = localStorage.getItem(`${platform}Contacts`);
+    const existingContacts: Contact[] = existingContactsString 
+      ? JSON.parse(existingContactsString) 
+      : [];
+    
+    // Check if contact already exists
+    const contactExists = existingContacts.some(
+      contact => contact.name === newContact.name && contact.platform === platform
+    );
+    
+    if (!contactExists) {
+      // Add new contact
+      const updatedContacts = [...existingContacts, newContact];
+      localStorage.setItem(`${platform}Contacts`, JSON.stringify(updatedContacts));
+      
+      toast({
+        title: "Contact Added",
+        description: `${company.ceo} has been added to your ${platform} contacts.`,
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Contact Exists",
+        description: `${company.ceo} is already in your ${platform} contacts.`,
+        variant: "default",
+      });
+    }
+    
+    setTimeout(() => {
+      setAddingContact(prev => ({ ...prev, [platform]: false }));
+    }, 1500);
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -233,6 +295,71 @@ Looking forward to your response,
                       {company.salesEmail}
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  Add to Inbox
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center gap-1"
+                    onClick={() => handleAddContact('email')}
+                    disabled={addingContact.email}
+                  >
+                    {addingContact.email ? (
+                      <>
+                        <div className="animate-spin h-3 w-3 mr-1 border-2 border-b-transparent border-current rounded-full" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="h-3 w-3 mr-1 text-blue-600" />
+                        Email
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center gap-1"
+                    onClick={() => handleAddContact('linkedin')}
+                    disabled={addingContact.linkedin}
+                  >
+                    {addingContact.linkedin ? (
+                      <>
+                        <div className="animate-spin h-3 w-3 mr-1 border-2 border-b-transparent border-current rounded-full" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Linkedin className="h-3 w-3 mr-1 text-blue-600" />
+                        LinkedIn
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center gap-1"
+                    onClick={() => handleAddContact('twitter')}
+                    disabled={addingContact.twitter}
+                  >
+                    {addingContact.twitter ? (
+                      <>
+                        <div className="animate-spin h-3 w-3 mr-1 border-2 border-b-transparent border-current rounded-full" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Twitter className="h-3 w-3 mr-1 text-blue-600" />
+                        Twitter
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
 

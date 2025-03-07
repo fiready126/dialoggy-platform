@@ -58,29 +58,38 @@ export const InboxLayout: React.FC<InboxLayoutProps> = ({
           </div>
           
           <div className="overflow-y-auto flex-1">
-            {contacts.map(contact => (
-              <div
-                key={contact.id}
-                className={`p-3 cursor-pointer flex items-center gap-3 hover:bg-muted ${
-                  selectedContactId === contact.id ? "bg-muted" : ""
-                }`}
-                onClick={() => onSelectContact(contact.id)}
-              >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                  {contact.avatar ? (
-                    <img src={contact.avatar} alt={contact.name} className="h-10 w-10 rounded-full object-cover" />
-                  ) : (
-                    contact.name.charAt(0)
-                  )}
+            {contacts.length > 0 ? (
+              contacts.map(contact => (
+                <div
+                  key={contact.id}
+                  className={`p-3 cursor-pointer flex items-center gap-3 hover:bg-muted ${
+                    selectedContactId === contact.id ? "bg-muted" : ""
+                  }`}
+                  onClick={() => onSelectContact(contact.id)}
+                >
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                    {contact.avatar ? (
+                      <img src={contact.avatar} alt={contact.name} className="h-10 w-10 rounded-full object-cover" />
+                    ) : (
+                      contact.name.charAt(0)
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{contact.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {contact.company || (contact.handle ? `@${contact.handle}` : contact.email)}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{contact.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {contact.company || (contact.handle ? `@${contact.handle}` : contact.email)}
-                  </p>
-                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-muted-foreground">
+                <p className="text-sm">No contacts found</p>
+                <p className="text-xs mt-1">
+                  Add contacts from the company directory
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
         
