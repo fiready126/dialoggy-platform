@@ -1,8 +1,10 @@
+
 import React, { useState } from "react";
 import { InboxLayout } from "./InboxLayout";
 import { MessageThread } from "./MessageThread";
 import { EmptyState } from "./EmptyState";
 import { Contact, Thread, Message } from "@/types/inbox";
+import { JobData, InvestorData } from "@/types/chat"; // Add this import to fix the errors
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { UserPlus, UserCheck, Send, Search } from "lucide-react";
