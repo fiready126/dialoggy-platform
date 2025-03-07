@@ -6,14 +6,11 @@ import { Contact, Thread, Message } from "@/types/inbox";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { UserPlus, UserCheck, Send, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { JobsTable } from "@/components/JobsTable";
 import { InvestorsTable } from "@/components/InvestorsTable";
-import { JobData } from "@/types/chat";
-import { InvestorData } from "@/types/chat";
+import { RemoveContactModal } from "./RemoveContactModal";
 
-// Sample data for Twitter threads
 const TWITTER_THREADS: Thread[] = [
   {
     id: "tt1",
@@ -65,7 +62,6 @@ const TWITTER_THREADS: Thread[] = [
   },
 ];
 
-// Sample job data for contacts
 const CONTACT_JOBS: Record<string, JobData[]> = {
   "t1": [
     {
@@ -107,7 +103,6 @@ const CONTACT_JOBS: Record<string, JobData[]> = {
   ]
 };
 
-// Sample investor data for contacts
 const CONTACT_INVESTORS: Record<string, InvestorData[]> = {
   "t1": [
     {
@@ -141,17 +136,17 @@ interface TwitterInboxProps {
 }
 
 export const TwitterInbox: React.FC<TwitterInboxProps> = ({ contacts: propContacts }) => {
-  // Use provided contacts or fallback to sample data
   const [contacts, setContacts] = useState<Contact[]>(propContacts || []);
   const [threads, setThreads] = useState<Thread[]>(TWITTER_THREADS);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
+  const [contactToRemove, setContactToRemove] = useState<Contact | null>(null);
   const { toast } = useToast();
 
   const handleSelectContact = (contactId: string) => {
     setSelectedContactId(contactId);
     
-    // Find threads for this contact
     const contactThreads = threads.filter(thread => thread.contactId === contactId);
     if (contactThreads.length > 0) {
       setSelectedThreadId(contactThreads[0].id);
@@ -163,7 +158,6 @@ export const TwitterInbox: React.FC<TwitterInboxProps> = ({ contacts: propContac
   const handleSelectThread = (threadId: string) => {
     setSelectedThreadId(threadId);
     
-    // Mark the thread as read
     setThreads(prevThreads => 
       prevThreads.map(thread => 
         thread.id === threadId 
@@ -172,7 +166,6 @@ export const TwitterInbox: React.FC<TwitterInboxProps> = ({ contacts: propContac
       )
     );
     
-    // Update the selected contact
     const thread = threads.find(t => t.id === threadId);
     if (thread) {
       setSelectedContactId(thread.contactId);
@@ -188,11 +181,9 @@ export const TwitterInbox: React.FC<TwitterInboxProps> = ({ contacts: propContac
       return;
     }
     
-    // Check if there's already a thread with this contact
     const existingThreadIndex = threads.findIndex(t => t.contactId === selectedContactId);
     
     if (existingThreadIndex === -1) {
-      // Create a new thread
       const newThread: Thread = {
         id: `tt${threads.length + 1}`,
         contactId: selectedContactId,
@@ -204,7 +195,6 @@ export const TwitterInbox: React.FC<TwitterInboxProps> = ({ contacts: propContac
       setThreads([newThread, ...threads]);
       setSelectedThreadId(newThread.id);
     } else {
-      // Select the existing thread
       setSelectedThreadId(threads[existingThreadIndex].id);
     }
   };
@@ -258,6 +248,38 @@ export const TwitterInbox: React.FC<TwitterInboxProps> = ({ contacts: propContac
     }
   };
 
+  const handleRemoveContactClick = (contactId: string) => {
+    const contact = contacts.find(c => c.id === contactId);
+    if (contact) {
+      setContactToRemove(contact);
+      setRemoveModalOpen(true);
+    }
+  };
+
+  const handleRemoveContact = () => {
+    if (!contactToRemove) return;
+    
+    const updatedContacts = contacts.filter(c => c.id !== contactToRemove.id);
+    setContacts(updatedContacts);
+    
+    const updatedThreads = threads.filter(t => t.contactId !== contactToRemove.id);
+    setThreads(updatedThreads);
+    
+    localStorage.setItem("twitterContacts", JSON.stringify(updatedContacts));
+    
+    if (selectedContactId === contactToRemove.id) {
+      setSelectedContactId(null);
+      setSelectedThreadId(null);
+    }
+    
+    toast({
+      description: `${contactToRemove.name} has been removed from your contacts`,
+    });
+    
+    setRemoveModalOpen(false);
+    setContactToRemove(null);
+  };
+
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
   
@@ -265,131 +287,143 @@ export const TwitterInbox: React.FC<TwitterInboxProps> = ({ contacts: propContac
   const contactInvestors = selectedContactId ? CONTACT_INVESTORS[selectedContactId] || [] : [];
 
   return (
-    <InboxLayout
-      title="Twitter Messages"
-      contacts={contacts}
-      threads={selectedContactId ? threads.filter(t => t.contactId === selectedContactId) : []}
-      selectedContactId={selectedContactId}
-      selectedThreadId={selectedThreadId}
-      onSelectContact={handleSelectContact}
-      onSelectThread={handleSelectThread}
-      onNewMessage={handleNewMessage}
-      jobsContent={selectedContact && (
-        <JobsTable 
-          jobs={contactJobs} 
-          companyName={selectedContact.company || selectedContact.name}
-        />
-      )}
-      investorsContent={selectedContact && (
-        <InvestorsTable 
-          investors={contactInvestors} 
-          companyName={selectedContact.company || selectedContact.name}
-        />
-      )}
-    >
-      {selectedThread && selectedContact ? (
-        <>
-          <div className="p-4 border-b flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                {selectedContact.avatar ? (
-                  <img src={selectedContact.avatar} alt={selectedContact.name} className="h-10 w-10 rounded-full object-cover" />
-                ) : (
-                  selectedContact.name.charAt(0)
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">{selectedContact.name}</p>
-                  <span className="text-sm text-muted-foreground">@{selectedContact.handle}</span>
+    <>
+      <InboxLayout
+        title="Twitter Messages"
+        contacts={contacts}
+        threads={selectedContactId ? threads.filter(t => t.contactId === selectedContactId) : []}
+        selectedContactId={selectedContactId}
+        selectedThreadId={selectedThreadId}
+        onSelectContact={handleSelectContact}
+        onSelectThread={handleSelectThread}
+        onNewMessage={handleNewMessage}
+        onRemoveContact={handleRemoveContactClick}
+        jobsContent={selectedContact && (
+          <JobsTable 
+            jobs={contactJobs} 
+            companyName={selectedContact.company || selectedContact.name}
+          />
+        )}
+        investorsContent={selectedContact && (
+          <InvestorsTable 
+            investors={contactInvestors} 
+            companyName={selectedContact.company || selectedContact.name}
+          />
+        )}
+      >
+        {selectedThread && selectedContact ? (
+          <>
+            <div className="p-4 border-b flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                  {selectedContact.avatar ? (
+                    <img src={selectedContact.avatar} alt={selectedContact.name} className="h-10 w-10 rounded-full object-cover" />
+                  ) : (
+                    selectedContact.name.charAt(0)
+                  )}
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 rounded-full"
-                    onClick={() => handleToggleFollow(selectedContact.id)}
-                  >
-                    {selectedContact.isFollowing ? (
-                      <>
-                        <UserCheck className="h-3 w-3 mr-1" /> Following
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="h-3 w-3 mr-1" /> Follow
-                      </>
-                    )}
-                  </Button>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{selectedContact.name}</p>
+                    <span className="text-sm text-muted-foreground">@{selectedContact.handle}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 rounded-full"
+                      onClick={() => handleToggleFollow(selectedContact.id)}
+                    >
+                      {selectedContact.isFollowing ? (
+                        <>
+                          <UserCheck className="h-3 w-3 mr-1" /> Following
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="h-3 w-3 mr-1" /> Follow
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div 
-            className="flex-1 overflow-y-auto p-4 space-y-4"
-          >
-            {selectedThread.messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.isIncoming ? "justify-start" : "justify-end"
-                }`}
-              >
+            <div 
+              className="flex-1 overflow-y-auto p-4 space-y-4"
+            >
+              {selectedThread.messages.map((message) => (
                 <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.isIncoming
-                      ? "bg-muted"
-                      : "bg-primary text-primary-foreground"
+                  key={message.id}
+                  className={`flex ${
+                    message.isIncoming ? "justify-start" : "justify-end"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
-                  <p className="text-xs text-right mt-1 opacity-70">
-                    {new Date(message.timestamp).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                  <div
+                    className={`max-w-[80%] p-3 rounded-lg ${
+                      message.isIncoming
+                        ? "bg-muted"
+                        : "bg-primary text-primary-foreground"
+                    }`}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                    <p className="text-xs text-right mt-1 opacity-70">
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Type your message..."
-                className="min-h-24 resize-none"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    const target = e.target as HTMLTextAreaElement;
-                    handleSendMessage(selectedThread.id, target.value);
-                    target.value = "";
-                  }
-                }}
-              />
-              <Button
-                variant="default"
-                size="icon"
-                className="rounded-full self-end"
-                onClick={(e) => {
-                  const textarea = e.currentTarget.parentElement?.querySelector('textarea');
-                  if (textarea && textarea.value.trim()) {
-                    handleSendMessage(selectedThread.id, textarea.value);
-                    textarea.value = "";
-                  }
-                }}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+              ))}
             </div>
-          </div>
-        </>
-      ) : selectedContact ? (
-        <EmptyState type="thread" platform="twitter" />
-      ) : (
-        <EmptyState type="contact" platform="twitter" />
+
+            <div className="p-4 border-t">
+              <div className="relative w-full">
+                <Textarea
+                  placeholder="Type your message..."
+                  className="min-h-24 resize-none pr-12"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      const target = e.target as HTMLTextAreaElement;
+                      handleSendMessage(selectedThread.id, target.value);
+                      target.value = "";
+                    }
+                  }}
+                />
+                <Button
+                  variant="default"
+                  size="icon"
+                  className="absolute right-3 bottom-3 h-8 w-8 rounded-full"
+                  onClick={(e) => {
+                    const textarea = e.currentTarget.parentElement?.querySelector('textarea');
+                    if (textarea && textarea.value.trim()) {
+                      handleSendMessage(selectedThread.id, textarea.value);
+                      textarea.value = "";
+                    }
+                  }}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </>
+        ) : selectedContact ? (
+          <EmptyState type="thread" platform="twitter" />
+        ) : (
+          <EmptyState type="contact" platform="twitter" />
+        )}
+      </InboxLayout>
+
+      {contactToRemove && (
+        <RemoveContactModal
+          open={removeModalOpen}
+          contactName={contactToRemove.name}
+          onClose={() => setRemoveModalOpen(false)}
+          onConfirm={handleRemoveContact}
+        />
       )}
-    </InboxLayout>
+    </>
   );
 };

@@ -97,20 +97,20 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
       </div>
 
       <div className="p-4 border-t">
-        <div className="flex gap-2">
+        <div className="relative w-full">
           <Textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your message..."
-            className="min-h-24 resize-none"
+            className="min-h-24 resize-none pr-20"
           />
-          <div className="flex flex-col gap-2">
+          <div className="absolute right-3 bottom-3 flex flex-row gap-2">
             <Button
               variant="outline"
               size="icon"
               type="button"
-              className="rounded-full"
+              className="h-8 w-8 rounded-full"
             >
               <Paperclip className="h-4 w-4" />
             </Button>
@@ -118,7 +118,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
               variant="default"
               size="icon"
               type="button"
-              className="rounded-full"
+              className="h-8 w-8 rounded-full"
               onClick={handleSendMessage}
               disabled={!newMessage.trim()}
             >
