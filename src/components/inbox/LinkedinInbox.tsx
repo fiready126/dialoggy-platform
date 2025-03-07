@@ -11,6 +11,7 @@ import { JobsTable } from "@/components/JobsTable";
 import { InvestorsTable } from "@/components/InvestorsTable";
 import { JobData } from "@/types/chat";
 import { InvestorData } from "@/types/chat";
+import { RemoveContactModal } from "./RemoveContactModal";
 
 // Sample data for LinkedIn threads
 const LINKEDIN_THREADS: Thread[] = [
@@ -142,6 +143,8 @@ export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propCont
   const [threads, setThreads] = useState<Thread[]>(LINKEDIN_THREADS);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
+  const [contactToRemove, setContactToRemove] = useState<Contact | null>(null);
   const { toast } = useToast();
 
   const handleSelectContact = (contactId: string) => {
@@ -254,37 +257,43 @@ export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propCont
     }
   };
 
-  const handleRemoveContact = (contactId: string) => {
-    // First check if this contact has any threads
-    const contactThreads = threads.filter(thread => thread.contactId === contactId);
-    
-    // Remove the threads for this contact
-    if (contactThreads.length > 0) {
-      setThreads(prevThreads => prevThreads.filter(thread => thread.contactId !== contactId));
+  const handleRemoveContactClick = (contactId: string) => {
+    const contact = contacts.find(c => c.id === contactId);
+    if (contact) {
+      setContactToRemove(contact);
+      setRemoveModalOpen(true);
     }
+  };
+
+  const handleRemoveContact = () => {
+    if (!contactToRemove) return;
+    
+    // Remove threads for this contact
+    const updatedThreads = threads.filter(t => t.contactId !== contactToRemove.id);
+    setThreads(updatedThreads);
     
     // Remove the contact
-    setContacts(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
+    const updatedContacts = contacts.filter(c => c.id !== contactToRemove.id);
+    setContacts(updatedContacts);
     
     // Clear selection if we're removing the selected contact
-    if (selectedContactId === contactId) {
+    if (selectedContactId === contactToRemove.id) {
       setSelectedContactId(null);
       setSelectedThreadId(null);
     }
     
-    // Show toast notification
-    const contact = contacts.find(c => c.id === contactId);
-    if (contact) {
-      toast({
-        description: `Removed ${contact.name} from contacts`,
-      });
-    }
+    toast({
+      description: `${contactToRemove.name} has been removed from your contacts`,
+    });
+    
+    setRemoveModalOpen(false);
+    setContactToRemove(null);
     
     // Also remove from localStorage if it exists there
     try {
       const storedContacts = JSON.parse(localStorage.getItem('contacts') || '[]');
-      const updatedContacts = storedContacts.filter((c: Contact) => c.id !== contactId);
-      localStorage.setItem('contacts', JSON.stringify(updatedContacts));
+      const updatedStoredContacts = storedContacts.filter((c: Contact) => c.id !== contactToRemove.id);
+      localStorage.setItem('contacts', JSON.stringify(updatedStoredContacts));
     } catch (error) {
       console.error('Error updating localStorage', error);
     }
@@ -297,140 +306,151 @@ export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propCont
   const contactInvestors = selectedContactId ? CONTACT_INVESTORS[selectedContactId] || [] : [];
 
   return (
-    <InboxLayout
-      title="LinkedIn Messages"
-      contacts={contacts}
-      threads={selectedContactId ? threads.filter(t => t.contactId === selectedContactId) : []}
-      selectedContactId={selectedContactId}
-      selectedThreadId={selectedThreadId}
-      onSelectContact={handleSelectContact}
-      onSelectThread={handleSelectThread}
-      onNewMessage={handleNewMessage}
-      onRemoveContact={handleRemoveContact}
-      jobsContent={selectedContact && (
-        <JobsTable 
-          jobs={contactJobs} 
-          companyName={selectedContact.company || selectedContact.name}
-        />
-      )}
-      investorsContent={selectedContact && (
-        <InvestorsTable 
-          investors={contactInvestors} 
-          companyName={selectedContact.company || selectedContact.name}
-        />
-      )}
-    >
-      {selectedThread && selectedContact ? (
-        <>
-          <div className="p-4 border-b flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                {selectedContact.avatar ? (
-                  <img src={selectedContact.avatar} alt={selectedContact.name} className="h-10 w-10 rounded-full object-cover" />
-                ) : (
-                  selectedContact.name.charAt(0)
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">{selectedContact.name}</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 rounded-full"
-                    onClick={() => handleToggleFollow(selectedContact.id)}
-                  >
-                    {selectedContact.isFollowing ? (
-                      <>
-                        <UserCheck className="h-3 w-3 mr-1" /> Following
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="h-3 w-3 mr-1" /> Follow
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 rounded-full text-destructive hover:bg-destructive/10"
-                    onClick={() => handleRemoveContact(selectedContact.id)}
-                  >
-                    <UserX className="h-3 w-3 mr-1" /> Remove
-                  </Button>
+    <>
+      <InboxLayout
+        title="LinkedIn Messages"
+        contacts={contacts}
+        threads={selectedContactId ? threads.filter(t => t.contactId === selectedContactId) : []}
+        selectedContactId={selectedContactId}
+        selectedThreadId={selectedThreadId}
+        onSelectContact={handleSelectContact}
+        onSelectThread={handleSelectThread}
+        onNewMessage={handleNewMessage}
+        onRemoveContact={handleRemoveContactClick}
+        jobsContent={selectedContact && (
+          <JobsTable 
+            jobs={contactJobs} 
+            companyName={selectedContact.company || selectedContact.name}
+          />
+        )}
+        investorsContent={selectedContact && (
+          <InvestorsTable 
+            investors={contactInvestors} 
+            companyName={selectedContact.company || selectedContact.name}
+          />
+        )}
+      >
+        {selectedThread && selectedContact ? (
+          <>
+            <div className="p-4 border-b flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                  {selectedContact.avatar ? (
+                    <img src={selectedContact.avatar} alt={selectedContact.name} className="h-10 w-10 rounded-full object-cover" />
+                  ) : (
+                    selectedContact.name.charAt(0)
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {selectedContact.position} at {selectedContact.company}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div 
-            className="flex-1 overflow-y-auto p-4 space-y-4"
-          >
-            {selectedThread.messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.isIncoming ? "justify-start" : "justify-end"
-                }`}
-              >
-                <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.isIncoming
-                      ? "bg-muted"
-                      : "bg-primary text-primary-foreground"
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
-                  <p className="text-xs text-right mt-1 opacity-70">
-                    {new Date(message.timestamp).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{selectedContact.name}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 rounded-full"
+                      onClick={() => handleToggleFollow(selectedContact.id)}
+                    >
+                      {selectedContact.isFollowing ? (
+                        <>
+                          <UserCheck className="h-3 w-3 mr-1" /> Following
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="h-3 w-3 mr-1" /> Follow
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 rounded-full text-destructive hover:bg-destructive/10"
+                      onClick={() => handleRemoveContactClick(selectedContact.id)}
+                    >
+                      <UserX className="h-3 w-3 mr-1" /> Remove
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedContact.position} at {selectedContact.company}
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="p-4 border-t">
-            <div className="relative w-full">
-              <Textarea
-                placeholder="Type your message..."
-                className="min-h-24 resize-none pr-12 w-full"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    const target = e.target as HTMLTextAreaElement;
-                    handleSendMessage(selectedThread.id, target.value);
-                    target.value = "";
-                  }
-                }}
-              />
-              <Button
-                variant="default"
-                size="icon"
-                className="rounded-full absolute right-2 bottom-2"
-                onClick={(e) => {
-                  const textarea = e.currentTarget.closest('.relative')?.querySelector('textarea');
-                  if (textarea && textarea.value.trim()) {
-                    handleSendMessage(selectedThread.id, textarea.value);
-                    textarea.value = "";
-                  }
-                }}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
             </div>
-          </div>
-        </>
-      ) : selectedContact ? (
-        <EmptyState type="thread" platform="linkedin" />
-      ) : (
-        <EmptyState type="contact" platform="linkedin" />
+
+            <div 
+              className="flex-1 overflow-y-auto p-4 space-y-4"
+            >
+              {selectedThread.messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${
+                    message.isIncoming ? "justify-start" : "justify-end"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[80%] p-3 rounded-lg ${
+                      message.isIncoming
+                        ? "bg-muted"
+                        : "bg-primary text-primary-foreground"
+                    }`}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                    <p className="text-xs text-right mt-1 opacity-70">
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 border-t">
+              <div className="relative w-full">
+                <Textarea
+                  placeholder="Type your message..."
+                  className="min-h-24 resize-none pr-12 w-full"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      const target = e.target as HTMLTextAreaElement;
+                      handleSendMessage(selectedThread.id, target.value);
+                      target.value = "";
+                    }
+                  }}
+                />
+                <Button
+                  variant="default"
+                  size="icon"
+                  className="rounded-full absolute right-2 bottom-2"
+                  onClick={(e) => {
+                    const textarea = e.currentTarget.closest('.relative')?.querySelector('textarea');
+                    if (textarea && textarea.value.trim()) {
+                      handleSendMessage(selectedThread.id, textarea.value);
+                      textarea.value = "";
+                    }
+                  }}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </>
+        ) : selectedContact ? (
+          <EmptyState type="thread" platform="linkedin" />
+        ) : (
+          <EmptyState type="contact" platform="linkedin" />
+        )}
+      </InboxLayout>
+
+      {contactToRemove && (
+        <RemoveContactModal
+          open={removeModalOpen}
+          contactName={contactToRemove.name}
+          onClose={() => setRemoveModalOpen(false)}
+          onConfirm={handleRemoveContact}
+        />
       )}
-    </InboxLayout>
+    </>
   );
 };

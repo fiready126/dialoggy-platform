@@ -8,6 +8,7 @@ import { JobsTable } from "@/components/JobsTable";
 import { InvestorsTable } from "@/components/InvestorsTable";
 import { JobData } from "@/types/chat";
 import { InvestorData } from "@/types/chat";
+import { RemoveContactModal } from "./RemoveContactModal";
 
 // Sample data for email contacts
 const EMAIL_CONTACTS: Contact[] = [
@@ -197,10 +198,12 @@ interface EmailInboxProps {
 
 export const EmailInbox: React.FC<EmailInboxProps> = ({ contacts: propContacts }) => {
   // Use provided contacts or fallback to sample data
-  const [contacts] = useState<Contact[]>(propContacts || EMAIL_CONTACTS);
+  const [contacts, setContacts] = useState<Contact[]>(propContacts || EMAIL_CONTACTS);
   const [threads, setThreads] = useState<Thread[]>(EMAIL_THREADS);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
+  const [contactToRemove, setContactToRemove] = useState<Contact | null>(null);
   const { toast } = useToast();
 
   const handleSelectContact = (contactId: string) => {
@@ -294,6 +297,39 @@ export const EmailInbox: React.FC<EmailInboxProps> = ({ contacts: propContacts }
     });
   };
 
+  const handleRemoveContactClick = (contactId: string) => {
+    const contact = contacts.find(c => c.id === contactId);
+    if (contact) {
+      setContactToRemove(contact);
+      setRemoveModalOpen(true);
+    }
+  };
+
+  const handleRemoveContact = () => {
+    if (!contactToRemove) return;
+    
+    // Remove threads for this contact
+    const updatedThreads = threads.filter(t => t.contactId !== contactToRemove.id);
+    setThreads(updatedThreads);
+    
+    // Remove the contact
+    const updatedContacts = contacts.filter(c => c.id !== contactToRemove.id);
+    setContacts(updatedContacts);
+    
+    // Clear selection if we're removing the selected contact
+    if (selectedContactId === contactToRemove.id) {
+      setSelectedContactId(null);
+      setSelectedThreadId(null);
+    }
+    
+    toast({
+      description: `${contactToRemove.name} has been removed from your contacts`,
+    });
+    
+    setRemoveModalOpen(false);
+    setContactToRemove(null);
+  };
+
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
   
@@ -301,39 +337,51 @@ export const EmailInbox: React.FC<EmailInboxProps> = ({ contacts: propContacts }
   const contactInvestors = selectedContactId ? CONTACT_INVESTORS[selectedContactId] || [] : [];
 
   return (
-    <InboxLayout
-      title="Email Inbox"
-      contacts={contacts}
-      threads={selectedContactId ? threads.filter(t => t.contactId === selectedContactId) : []}
-      selectedContactId={selectedContactId}
-      selectedThreadId={selectedThreadId}
-      onSelectContact={handleSelectContact}
-      onSelectThread={handleSelectThread}
-      onNewMessage={handleNewMessage}
-      jobsContent={selectedContact && (
-        <JobsTable 
-          jobs={contactJobs} 
-          companyName={selectedContact.company || selectedContact.name}
+    <>
+      <InboxLayout
+        title="Email Inbox"
+        contacts={contacts}
+        threads={selectedContactId ? threads.filter(t => t.contactId === selectedContactId) : []}
+        selectedContactId={selectedContactId}
+        selectedThreadId={selectedThreadId}
+        onSelectContact={handleSelectContact}
+        onSelectThread={handleSelectThread}
+        onNewMessage={handleNewMessage}
+        onRemoveContact={handleRemoveContactClick}
+        jobsContent={selectedContact && (
+          <JobsTable 
+            jobs={contactJobs} 
+            companyName={selectedContact.company || selectedContact.name}
+          />
+        )}
+        investorsContent={selectedContact && (
+          <InvestorsTable 
+            investors={contactInvestors} 
+            companyName={selectedContact.company || selectedContact.name}
+          />
+        )}
+      >
+        {selectedThread && selectedContact ? (
+          <MessageThread 
+            thread={selectedThread}
+            contact={selectedContact}
+            onSendMessage={handleSendMessage}
+          />
+        ) : selectedContact ? (
+          <EmptyState type="thread" platform="email" />
+        ) : (
+          <EmptyState type="contact" platform="email" />
+        )}
+      </InboxLayout>
+
+      {contactToRemove && (
+        <RemoveContactModal
+          open={removeModalOpen}
+          contactName={contactToRemove.name}
+          onClose={() => setRemoveModalOpen(false)}
+          onConfirm={handleRemoveContact}
         />
       )}
-      investorsContent={selectedContact && (
-        <InvestorsTable 
-          investors={contactInvestors} 
-          companyName={selectedContact.company || selectedContact.name}
-        />
-      )}
-    >
-      {selectedThread && selectedContact ? (
-        <MessageThread 
-          thread={selectedThread}
-          contact={selectedContact}
-          onSendMessage={handleSendMessage}
-        />
-      ) : selectedContact ? (
-        <EmptyState type="thread" platform="email" />
-      ) : (
-        <EmptyState type="contact" platform="email" />
-      )}
-    </InboxLayout>
+    </>
   );
 };
