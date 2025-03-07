@@ -5,7 +5,7 @@ import { EmptyState } from "./EmptyState";
 import { Contact, Thread, Message } from "@/types/inbox";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { UserPlus, UserCheck, Send } from "lucide-react";
+import { UserPlus, UserCheck, Send, UserX } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { JobsTable } from "@/components/JobsTable";
 import { InvestorsTable } from "@/components/InvestorsTable";
@@ -254,6 +254,42 @@ export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propCont
     }
   };
 
+  const handleRemoveContact = (contactId: string) => {
+    // First check if this contact has any threads
+    const contactThreads = threads.filter(thread => thread.contactId === contactId);
+    
+    // Remove the threads for this contact
+    if (contactThreads.length > 0) {
+      setThreads(prevThreads => prevThreads.filter(thread => thread.contactId !== contactId));
+    }
+    
+    // Remove the contact
+    setContacts(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
+    
+    // Clear selection if we're removing the selected contact
+    if (selectedContactId === contactId) {
+      setSelectedContactId(null);
+      setSelectedThreadId(null);
+    }
+    
+    // Show toast notification
+    const contact = contacts.find(c => c.id === contactId);
+    if (contact) {
+      toast({
+        description: `Removed ${contact.name} from contacts`,
+      });
+    }
+    
+    // Also remove from localStorage if it exists there
+    try {
+      const storedContacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+      const updatedContacts = storedContacts.filter((c: Contact) => c.id !== contactId);
+      localStorage.setItem('contacts', JSON.stringify(updatedContacts));
+    } catch (error) {
+      console.error('Error updating localStorage', error);
+    }
+  };
+
   const selectedThread = selectedThreadId ? threads.find(t => t.id === selectedThreadId) : null;
   const selectedContact = selectedContactId ? contacts.find(c => c.id === selectedContactId) : null;
   
@@ -270,6 +306,7 @@ export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propCont
       onSelectContact={handleSelectContact}
       onSelectThread={handleSelectThread}
       onNewMessage={handleNewMessage}
+      onRemoveContact={handleRemoveContact}
       jobsContent={selectedContact && (
         <JobsTable 
           jobs={contactJobs} 
@@ -313,6 +350,14 @@ export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propCont
                       </>
                     )}
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 rounded-full text-destructive hover:bg-destructive/10"
+                    onClick={() => handleRemoveContact(selectedContact.id)}
+                  >
+                    <UserX className="h-3 w-3 mr-1" /> Remove
+                  </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {selectedContact.position} at {selectedContact.company}
@@ -351,10 +396,10 @@ export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propCont
           </div>
 
           <div className="p-4 border-t">
-            <div className="flex gap-2">
+            <div className="relative w-full">
               <Textarea
                 placeholder="Type your message..."
-                className="min-h-24 resize-none"
+                className="min-h-24 resize-none pr-12 w-full"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -367,9 +412,9 @@ export const LinkedinInbox: React.FC<LinkedinInboxProps> = ({ contacts: propCont
               <Button
                 variant="default"
                 size="icon"
-                className="rounded-full self-end"
+                className="rounded-full absolute right-2 bottom-2"
                 onClick={(e) => {
-                  const textarea = e.currentTarget.parentElement?.querySelector('textarea');
+                  const textarea = e.currentTarget.closest('.relative')?.querySelector('textarea');
                   if (textarea && textarea.value.trim()) {
                     handleSendMessage(selectedThread.id, textarea.value);
                     textarea.value = "";

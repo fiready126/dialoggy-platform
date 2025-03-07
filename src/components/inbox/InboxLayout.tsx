@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from "react";
 import { Contact, Thread } from "@/types/inbox";
-import { Search, Plus, MoreVertical, Briefcase, TrendingUp, MessageCircle } from "lucide-react";
+import { Search, Plus, MoreVertical, Briefcase, TrendingUp, MessageCircle, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +16,7 @@ interface InboxLayoutProps {
   onSelectContact: (contactId: string) => void;
   onSelectThread: (threadId: string) => void;
   onNewMessage: () => void;
+  onRemoveContact?: (contactId: string) => void;
   children: React.ReactNode;
   platformTabs?: ReactNode;
   jobsContent?: ReactNode;
@@ -31,6 +32,7 @@ export const InboxLayout: React.FC<InboxLayoutProps> = ({
   onSelectContact,
   onSelectThread,
   onNewMessage,
+  onRemoveContact,
   children,
   platformTabs,
   jobsContent,
@@ -65,21 +67,35 @@ export const InboxLayout: React.FC<InboxLayoutProps> = ({
                   className={`p-3 cursor-pointer flex items-center gap-3 hover:bg-muted ${
                     selectedContactId === contact.id ? "bg-muted" : ""
                   }`}
-                  onClick={() => onSelectContact(contact.id)}
                 >
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                    {contact.avatar ? (
-                      <img src={contact.avatar} alt={contact.name} className="h-10 w-10 rounded-full object-cover" />
-                    ) : (
-                      contact.name.charAt(0)
-                    )}
+                  <div 
+                    className="flex-1 flex items-center gap-3" 
+                    onClick={() => onSelectContact(contact.id)}
+                  >
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                      {contact.avatar ? (
+                        <img src={contact.avatar} alt={contact.name} className="h-10 w-10 rounded-full object-cover" />
+                      ) : (
+                        contact.name.charAt(0)
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{contact.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {contact.company || (contact.handle ? `@${contact.handle}` : contact.email)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{contact.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {contact.company || (contact.handle ? `@${contact.handle}` : contact.email)}
-                    </p>
-                  </div>
+                  {onRemoveContact && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => onRemoveContact(contact.id)}
+                    >
+                      <UserX className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))
             ) : (
