@@ -117,7 +117,12 @@ export const InboxLayout: React.FC<InboxLayoutProps> = ({
               <TabsContent value="messages" className="flex flex-col flex-1 overflow-hidden m-0 p-0 border-none">
                 <div className="p-4 border-b flex justify-between items-center">
                   <h3 className="font-medium text-sm">Messages</h3>
-                  <Button onClick={onNewMessage} variant="ghost" size="sm" className="h-8">
+                  <Button 
+                    onClick={onNewMessage} 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8"
+                  >
                     <Plus className="h-4 w-4 mr-1" /> New
                   </Button>
                 </div>
@@ -144,7 +149,7 @@ export const InboxLayout: React.FC<InboxLayoutProps> = ({
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground truncate mt-1">
-                            {thread.subject || thread.messages[thread.messages.length - 1].content.substring(0, 30) + "..."}
+                            {thread.subject || (thread.messages.length > 0 ? thread.messages[thread.messages.length - 1].content.substring(0, 30) + "..." : "New conversation")}
                           </p>
                         </div>
                       );
